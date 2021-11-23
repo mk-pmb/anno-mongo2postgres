@@ -106,14 +106,7 @@ const flattenAndPrint = {
 
     try {
       popOrigAnno.expectEmpty();
-      if (latestOldRevi) {
-        equal.named('Top-level data must match latest revision', () => {
-          const metaMod = meta.dateLastModif;
-          const expected = { ...topDataRevi, created: metaMod };
-          delete expected.modified;
-          equal(latestOldRevi, expected);
-        });
-      }
+      flattenAndPrint.verifyLatestOldRevi(meta, topDataRevi, latestOldRevi);
     } catch (err) {
       flat.ERROR = String(err);
     }
@@ -172,6 +165,26 @@ const flattenAndPrint = {
       detail: meta,
     }, revi);
     return revi;
+  },
+
+  verifyLatestOldRevi(meta, topDataRevi, latestOldRevi) {
+    if (!latestOldRevi) { return; }
+    const metaMod = meta.dateLastModif;
+
+    if (metaMod !== latestOldRevi.created) {
+      const msg = ('Dates mismatch:'
+        + '\nTop-level anno was last modified '
+        + JSON.stringify(metaMod)
+        + '\nbut latest revision was created  '
+        + JSON.stringify(latestOldRevi.created));
+      throw new Error(msg);
+    }
+
+    equal.named('Top-level data must match latest revision', () => {
+      const expected = { ...topDataRevi, created: metaMod };
+      delete expected.modified;
+      equal(latestOldRevi, expected);
+    });
   },
 
 };
