@@ -95,14 +95,14 @@ const flattenAndPrint = {
       return flattenAndPrint.checkOldRevision(r, meta, origAnno);
     });
 
-    const latestOldRevi = oldRevis.pop();
-
     let flat = {
       ERROR: null,
       meta,
       topDataRevi,
-      oldRevis,
     };
+    const latestOldRevi = oldRevis.pop();
+    const nRevis = oldRevis.length;
+    if (nRevis) { Object.assign(flat, { nRevis, oldRevis }); }
 
     try {
       popOrigAnno.expectEmpty();
@@ -171,6 +171,7 @@ const flattenAndPrint = {
       hint: 'parent meta',
       detail: meta,
     }, revi);
+    return revi;
   },
 
 };
