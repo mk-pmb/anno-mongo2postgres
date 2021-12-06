@@ -1,2 +1,4 @@
 
-/211025.jsonld
+/[0-9]*.jsonld
+/*.+*+*.jsonld
+/latest.jsonld
