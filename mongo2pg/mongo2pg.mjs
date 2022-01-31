@@ -37,7 +37,12 @@ async function cliMain() {
   console.log('[');
   [].concat(data).forEach(function topLevelAnno(anno, idx) {
     console.error({ idx, progress: idx / nSliced });
-    flattenAndPrint.oneTopAnno(anno);
+    try {
+      flattenAndPrint.oneTopAnno(anno);
+    } catch (flapErr) {
+      flapErr.message = '@[idx=' + idx + '] ' + flapErr.message;
+      throw flapErr;
+    }
   });
   console.log('null ]');
   console.error({ done: nSliced, progress: 1 });

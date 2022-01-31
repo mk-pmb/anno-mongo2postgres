@@ -37,7 +37,7 @@ const chkOld = function checkOldRevision(origRevi, meta, parentOrigAnno) {
     revi.ERROR = String(err);
   }
   previewOrDeleteErrorProp({
-    func: 'checkOldRevision:',
+    func: 'checkOldRevision',
     hint: 'parent meta',
     detail: meta,
   }, revi);
