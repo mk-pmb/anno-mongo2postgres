@@ -1,5 +1,8 @@
 // -*- coding: utf-8, tab-width: 2 -*-
 
+import equal from 'equal-pmb';
+
+
 const copyToplevelProps = [
   'canonical',
   'collection',
@@ -36,7 +39,8 @@ const mau = {
 
 
   popUselessAnnoProps(pop) {
-    pop.mustBe([['oneOf', 'Annotation']], 'type');
+    const annoType = pop.mustBe('undef | ary | eeq:"Annotation"', 'type');
+    if (Array.isArray(annoType)) { equal(annoType, ['Annotation']); }
   },
 
 

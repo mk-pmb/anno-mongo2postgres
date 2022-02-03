@@ -5,7 +5,7 @@ import mustBe from 'typechecks-pmb/must-be.js';
 import equal from 'equal-pmb';
 
 import unclutter from './unclutter.mjs';
-import previewOrDeleteErrorProp from './previewOrDeleteErrorProp.mjs';
+import storeErrorReport from './storeErrorReport.mjs';
 
 
 const ignoreRevisionKeysEqualToAnno = [
@@ -17,15 +17,25 @@ const ignoreRevisionKeysEqualToAnno = [
 ];
 
 
-const chkOld = function checkOldRevision(origRevi, meta, parentOrigAnno) {
-  const popOrigRevi = objPop(origRevi, { mustBe });
+const chkOld = function checkOldRevision(params) {
+  const {
+    cliState,
+    currentAnno,
+    topAnnoMeta,
+    topReviData,
+  } = params;
+  const origOldRevi = params.oldRevi;
+
+  const popOrigRevi = objPop(origOldRevi, { mustBe });
   unclutter.popUselessRevisionProps(popOrigRevi);
-  const revi = { ERROR: null, ...unclutter.popRevisionKeys(popOrigRevi) };
+  const revi = {
+    ...unclutter.popRevisionKeys(popOrigRevi),
+  };
   ignoreRevisionKeysEqualToAnno.forEach(function ign(key) {
-    const val = origRevi[key];
+    const val = origOldRevi[key];
     if (val === undefined) { return; }
     try {
-      equal(val, parentOrigAnno[key]);
+      equal(val, currentAnno[key]);
       popOrigRevi(key);
     } finally {
       Boolean('no-op');
@@ -34,13 +44,15 @@ const chkOld = function checkOldRevision(origRevi, meta, parentOrigAnno) {
   try {
     popOrigRevi.expectEmpty();
   } catch (err) {
-    revi.ERROR = String(err);
+    storeErrorReport({
+      report: revi,
+      err,
+      func: 'checkOldRevision',
+      hint: 'parent meta',
+      detail: topAnnoMeta,
+      cliState,
+    });
   }
-  previewOrDeleteErrorProp({
-    func: 'checkOldRevision',
-    hint: 'parent meta',
-    detail: meta,
-  }, revi);
   return revi;
 };
 

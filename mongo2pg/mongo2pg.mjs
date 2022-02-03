@@ -34,18 +34,23 @@ async function cliMain() {
   const nSliced = data.length;
   console.error('Number of top-level annos after slicing:', nSliced);
 
+  const cliState = {
+    errorsInTopAnnoIdxs: [],
+  };
+
   console.log('[');
   [].concat(data).forEach(function topLevelAnno(anno, idx) {
     console.error({ idx, progress: idx / nSliced });
+    cliState.curTopAnnoIdx = idx;
     try {
-      flattenAndPrint.oneTopAnno(anno);
+      flattenAndPrint.oneTopAnno(cliState, anno);
     } catch (flapErr) {
       flapErr.message = '@[idx=' + idx + '] ' + flapErr.message;
       throw flapErr;
     }
   });
   console.log('null ]');
-  console.error({ done: nSliced, progress: 1 });
+  console.error({ done: nSliced, progress: 1 }, cliState);
 }
 
 

@@ -6,30 +6,35 @@ import mustBe from 'typechecks-pmb/must-be.js';
 import mongoAnnoUnclutter from './m-anno/unclutter.mjs';
 import verifyLatestOldRevi from './m-anno/verifyLatestOldRevi.mjs';
 import checkOldRevision from './m-anno/checkOldRevision.mjs';
-import previewOrDeleteErrorProp from './m-anno/previewOrDeleteErrorProp.mjs';
+import storeErrorReport from './m-anno/storeErrorReport.mjs';
 
 
 const flap = {
 
-  oneTopAnno(origTopAnno) {
-    flap.oneAnno(origTopAnno, []);
+  oneTopAnno(cliState, origTopAnno) {
+    flap.oneAnno(cliState, origTopAnno, []);
   },
 
-  oneAnno(origAnno, parents) {
+  oneAnno(cliState, origAnno, parents) {
     const popOrigAnno = objPop(origAnno, { mustBe });
     const replies = popOrigAnno('_replies');
     mongoAnnoUnclutter.popUselessAnnoProps(popOrigAnno);
-    const meta = mongoAnnoUnclutter.popMeta(popOrigAnno);
-    const topDataRevi = mongoAnnoUnclutter.popRevisionKeys(popOrigAnno);
+    const topAnnoMeta = mongoAnnoUnclutter.popMeta(popOrigAnno);
+    const topReviData = mongoAnnoUnclutter.popRevisionKeys(popOrigAnno);
     const origOldRevis = [].concat(popOrigAnno('_revisions')).filter(Boolean);
     const oldRevis = origOldRevis.map(function chkOld(r) {
-      return checkOldRevision(r, meta, origAnno);
+      return checkOldRevision({
+        cliState,
+        currentAnno: origAnno,
+        topAnnoMeta,
+        topReviData,
+        oldRevi: r,
+      });
     });
 
     let flat = {
-      ERROR: null,
-      meta,
-      topDataRevi,
+      origAnnoMeta: topAnnoMeta,
+      topReviData,
     };
     const latestOldRevi = oldRevis.pop();
     const nRevis = oldRevis.length;
@@ -37,11 +42,21 @@ const flap = {
 
     try {
       popOrigAnno.expectEmpty();
-      verifyLatestOldRevi(meta, topDataRevi, latestOldRevi);
+      verifyLatestOldRevi({
+        cliState,
+        topAnnoMeta,
+        topReviData,
+        latestOldRevi,
+      });
     } catch (err) {
-      flat.ERROR = String(err);
+      storeErrorReport({
+        report: flat,
+        err,
+        func: 'oneAnno',
+        hint: 'meta',
+        cliState,
+      });
     }
-    previewOrDeleteErrorProp({ func: 'oneAnno', hint: 'meta' }, flat);
 
     flat = JSON.stringify(flat, null, 2);
     flat = flat.replace(/^\{\s+/, '{ ');
@@ -53,8 +68,8 @@ const flap = {
         console.error('Parents:', parents);
         throw new RangeError('Annotation nested too deeply!');
       }
-      const subParents = [...parents, meta];
-      replies.forEach(sub => flap.oneAnno(sub, subParents));
+      const subParents = [...parents, topAnnoMeta];
+      replies.forEach(sub => flap.oneAnno(cliState, sub, subParents));
     }
   },
 
