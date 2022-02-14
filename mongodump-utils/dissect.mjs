@@ -3,34 +3,23 @@
 import 'p-fatal';
 import 'usnam-pmb';
 
-import parseCliOpt from 'minimist';
 import promiseFs from 'nofs';
-import pEachSeries from 'p-each-series';
 import getOwn from 'getown';
-import CountMap from 'count-map';
 import mustBe from 'typechecks-pmb/must-be.js';
-import vTry from 'vtry';
 
 
-import readRelaxedJsonFromStdin from './readRelaxedJsonFromStdin.mjs';
+import trafoCli from './trafoCli.mjs';
 import guessPrimaryTarget from './guessPrimaryTarget.mjs';
 
 function len(x) { return (+(x || false).length || 0); }
 function listLenSymb(o, k, s) { return getOwn(s, len(o[k]), s.slice(-1)[0]); }
 
 
-async function cliMain() {
-  const timeStarted = Date.now();
-  const cliOpt = parseCliOpt(process.argv.slice(2));
-  console.error('CLI options:', cliOpt);
-  const data = await readRelaxedJsonFromStdin(cliOpt);
-  const nSliced = data.length;
-  const uniqueStuffs = new CountMap();
-  const stats = new CountMap();
+const jobSpec = {
 
-  async function parseOneAnno(anno, mongoId) {
+  async eachToplevelAnno(anno, mongoId, job) {
     mustBe.nest('Mongo ID', mongoId);
-    uniqueStuffs.add('mongoId:' + mongoId);
+    job.hopefullyUniqueThings.add('mongoId:' + mongoId);
     const tgt = guessPrimaryTarget(anno);
     let { revHost } = tgt;
     if (!/^[a-z]+\./.test(revHost)) { return; }
@@ -46,7 +35,7 @@ async function cliMain() {
 
     const vr = ((listLenSymb(anno, '_revisions', ['nv', '', 'v'])
       + listLenSymb(anno, '_replies', ['', 'r'])) || 'e');
-    stats.add(vr);
+    job.stats.add(vr);
     const saveName = [
       ...tgt.pathParts.slice(-1),
       mongoId,
@@ -58,28 +47,8 @@ async function cliMain() {
       .replace(/^\{\s+/, '{ ') + '\n';
     await promiseFs.mkdirs(saveDir);
     await promiseFs.writeFile(saveDir + '/' + saveName, asJson);
-  }
+  },
 
-  await pEachSeries([].concat(data), function topLevelAnno(anno, idx) {
-    const mongoId = getOwn(anno, '_id');
-    console.error({ idx, progress: idx / nSliced }, { mongoId });
-    return vTry.pr(parseOneAnno, '@' + idx + '=' + mongoId + ': %s'
-    )(anno, mongoId);
-  });
+};
 
-  const dupes = uniqueStuffs.entries().reduce(function chk(dup, ent) {
-    const [x, n] = ent;
-    if (n > 1) { dup[x] = n; } // eslint-disable-line no-param-reassign
-    return dup;
-  }, {});
-  console.error({
-    done: nSliced,
-    progress: 1,
-    durationMinutes: Math.floor((Date.now() - timeStarted) / 60) / 1e3,
-    dupes,
-    stats: Object.fromEntries(stats.entries()),
-  });
-}
-
-
-cliMain();
+trafoCli(jobSpec);
