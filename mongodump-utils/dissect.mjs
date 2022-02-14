@@ -35,7 +35,7 @@ const jobSpec = {
 
     const vr = ((listLenSymb(anno, '_revisions', ['nv', '', 'v'])
       + listLenSymb(anno, '_replies', ['', 'r'])) || 'e');
-    job.stats.add(vr);
+    job.counters.add(vr);
     const saveName = [
       ...tgt.pathParts.slice(-1),
       mongoId,

@@ -1,8 +1,5 @@
 // -*- coding: utf-8, tab-width: 2 -*-
 
-import 'p-fatal';
-import 'usnam-pmb';
-
 import parseCliOpt from 'minimist';
 import pEachSeries from 'p-each-series';
 import getOwn from 'getown';
@@ -15,11 +12,15 @@ import readRelaxedJsonFromStdin from './readRelaxedJsonFromStdin.mjs';
 
 async function trafoCli(origJobSpec) {
   const timeStarted = Date.now();
+  const report = {
+    counters: new CountMap(),
+    errorsIds: [],
+  };
   const job = {
     ...origJobSpec,
     timeStarted,
     hopefullyUniqueThings: new CountMap(),
-    stats: new CountMap(),
+    ...report,
   };
   const cliOpt = parseCliOpt(process.argv.slice(2));
   console.error('CLI options:', cliOpt);
@@ -27,11 +28,19 @@ async function trafoCli(origJobSpec) {
   const nSliced = data.length;
 
   const { eachToplevelAnno } = job;
-  await pEachSeries([].concat(data), function topLevelAnno(anno, idx) {
+  await pEachSeries([].concat(data), async function topLevelAnno(anno, idx) {
     const mongoId = getOwn(anno, '_id');
-    console.error({ idx, progress: idx / nSliced }, { mongoId });
-    return vTry.pr(eachToplevelAnno, '@' + idx + '=' + mongoId + ': %s'
-    )(anno, mongoId, job);
+    const progress = idx / nSliced;
+    if ((idx % 1e3) === 0) { console.error({ idx, progress }, { mongoId }); }
+    const trace = '@' + idx + '=' + mongoId;
+    try {
+      await vTry.pr(eachToplevelAnno, [trace])(anno, mongoId, job);
+    } catch (err) {
+      job.errorsIds.push(mongoId);
+      console.error('v-- Error @', { idx, progress }, { mongoId });
+      console.error(err);
+      console.error('^-- Error @', { idx, progress }, { mongoId });
+    }
   });
 
   const dupes = job.hopefullyUniqueThings.entries().reduce((dup, ent) => {
@@ -41,19 +50,20 @@ async function trafoCli(origJobSpec) {
   }, {});
   const timeFinished = Date.now();
   const durationMsec = timeFinished - timeStarted;
-  const stats = Object.fromEntries(job.stats.entries());
+  Object.assign(report, {
+    counters: Object.fromEntries(job.counters.entries()),
+    dupes,
+  });
   Object.assign(job, {
     timeFinished,
     durationMsec,
-    dupes,
-    stats,
+    ...report,
   });
   console.error({
     done: nSliced,
     progress: 1,
     durationMinutes: durationMsec / 60e3,
-    dupes,
-    stats,
+    ...report,
   });
 }
 
