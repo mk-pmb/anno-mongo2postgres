@@ -11,7 +11,7 @@ import mustBe from 'typechecks-pmb/must-be.js';
 
 
 import trafoCli from './trafoCli.mjs';
-import guessPrimaryTarget from './guessPrimaryTarget.mjs';
+import guessSubjectTarget from './guessSubjectTarget.mjs';
 import pgUtil from './pgUtil.mjs';
 
 const annoBaseUrl = 'https://anno.ub.uni-heidelberg.de/anno/';
@@ -59,11 +59,11 @@ const jobSpec = {
     const allRevis = popProp('_revisions');
     allRevis.forEach(verifyRevision.bind(null, { topAnno, mongoId }));
 
-    const tgt = guessPrimaryTarget(topAnno);
+    const tgt = guessSubjectTarget(topAnno);
     const meta = {
       mongo_doc_id: mongoId,
       anno_id: mongoId,
-      primary_target: tgt.url,
+      subject_target: tgt.url,
       time_created: pgUtil.timestampFromIsoFmt(popProp('created')),
       author_local_userid: '',
     };

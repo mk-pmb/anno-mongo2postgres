@@ -4,7 +4,7 @@ import mustBe from 'typechecks-pmb/must-be';
 
 const safeUrlRgx = /^https?:\/{2}([a-z0-9_:\.\/\-]+)$/;
 
-const gpt = function guessPrimaryTarget(anno) {
+const gpt = function guessSubjectTarget(anno) {
   let tgt = anno.target;
   tgt = (tgt.scope
     || tgt.id

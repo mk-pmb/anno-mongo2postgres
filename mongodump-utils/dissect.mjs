@@ -9,7 +9,7 @@ import mustBe from 'typechecks-pmb/must-be.js';
 
 
 import trafoCli from './trafoCli.mjs';
-import guessPrimaryTarget from './guessPrimaryTarget.mjs';
+import guessSubjectTarget from './guessSubjectTarget.mjs';
 
 function len(x) { return (+(x || false).length || 0); }
 function listLenSymb(o, k, s) { return getOwn(s, len(o[k]), s.slice(-1)[0]); }
@@ -20,7 +20,7 @@ const jobSpec = {
   async eachToplevelAnno(anno, mongoId, job) {
     mustBe.nest('Mongo ID', mongoId);
     job.hopefullyUniqueThings.add('mongoId:' + mongoId);
-    const tgt = guessPrimaryTarget(anno);
+    const tgt = guessSubjectTarget(anno);
     let { revHost } = tgt;
     if (!/^[a-z]+\./.test(revHost)) { return; }
     revHost = revHost.replace(/^de\.uni-heidelberg\.ub\./, 'ubhd.');
