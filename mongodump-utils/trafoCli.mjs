@@ -40,7 +40,7 @@ async function trafoCli(origJobSpec) {
       job.errorsIds.push(mongoId);
       report.counters.add('error');
       console.error('v-- Error @', { idx, progress }, { mongoId });
-      console.error(err);
+      console.error(err.stack);
       console.error('^-- Error @', { idx, progress }, { mongoId });
     }
   });
