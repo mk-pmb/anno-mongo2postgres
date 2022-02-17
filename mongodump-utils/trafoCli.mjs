@@ -35,8 +35,10 @@ async function trafoCli(origJobSpec) {
     const trace = '@' + idx + '=' + mongoId;
     try {
       await vTry.pr(eachToplevelAnno, [trace])(anno, mongoId, job);
+      report.counters.add('success');
     } catch (err) {
       job.errorsIds.push(mongoId);
+      report.counters.add('error');
       console.error('v-- Error @', { idx, progress }, { mongoId });
       console.error(err);
       console.error('^-- Error @', { idx, progress }, { mongoId });
@@ -59,9 +61,7 @@ async function trafoCli(origJobSpec) {
     durationMsec,
     ...report,
   });
-  console.error({
-    done: nSliced,
-    progress: 1,
+  console.error('Done.', {
     durationMinutes: durationMsec / 60e3,
     ...report,
   });
