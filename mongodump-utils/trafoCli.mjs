@@ -53,6 +53,7 @@ async function trafoCli(origJobSpec) {
   const timeFinished = Date.now();
   const durationMsec = timeFinished - timeStarted;
   Object.assign(report, {
+    nSliced,
     counters: Object.fromEntries(job.counters.entries()),
     dupes,
   });

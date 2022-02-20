@@ -16,7 +16,7 @@ function toplist () {
       ') | sort | uniq --count | sort --general-numeric-sort --reverse
   ) | sed -rf <(echo '
     s~^( *[0-9]+) ~\1\t~
-    ') | tee -- toplist.txt
+    ') | tee -- tmp.toplist.txt
 }
 
 
