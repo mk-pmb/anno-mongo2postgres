@@ -8,6 +8,7 @@ import 'usnam-pmb';
 import objPop from 'objpop';
 import equal from 'equal-pmb';
 import mustBe from 'typechecks-pmb/must-be.js';
+import vTry from 'vtry';
 
 
 import trafoCli from './trafoCli.mjs';
@@ -27,25 +28,31 @@ function verifyReviUrl(pop, key, slug) {
 
 
 function verifyRevision(how, origRevi, reviIdx) {
-  const {
-    topAnno,
-    mongoId,
-  } = how;
-  const revi = { ...origRevi };
-  const popRevi = objPop.d(revi, { mustBe });
-  const reviNum = reviIdx + 1;
+  vTry(function fallibleVerifyRevision() {
+    const {
+      topAnno,
+      mongoId,
+      // allTopRevis,
+    } = how;
+    const revi = { ...origRevi };
+    const popRevi = objPop.d(revi, { mustBe });
+    const reviNum = reviIdx + 1;
 
-  verifyReviUrl(popRevi, 'id', mongoId + '~' + reviNum);
-  verifyReviUrl(popRevi, 'versionOf', mongoId);
-  popRevi.mustBe([['oneOf', [
-    undefined,
-    (topAnno.doi && (topAnno.doi + '_' + reviNum)),
-  ]]], 'doi');
+    verifyReviUrl(popRevi, 'id', mongoId + '~' + reviNum);
+    verifyReviUrl(popRevi, 'versionOf', mongoId);
+    popRevi.mustBe([['oneOf', [
+      undefined,
+      (topAnno.doi && (topAnno.doi + '_' + reviNum)),
+    ]]], 'doi');
 
-  Object.entries(revi).forEach(function verify([key, val]) {
-    if (val === undefined) { return; }
-    equal({ [key]: val }, { [key]: topAnno[key] });
-  });
+    Object.entries(revi).forEach(function verify([key, val]) {
+      if (val === undefined) { return; }
+      if (key === '_revisions') {
+        return val.forEach(verifyRevision.bind(null, how));
+      }
+      return equal({ [key]: val }, { [key]: topAnno[key] });
+    });
+  }, 'revi[' + reviIdx + ']')();
 }
 
 
@@ -56,8 +63,12 @@ const jobSpec = {
     const popProp = objPop.d(topAnno);
     popProp('_id');
 
-    const allRevis = popProp('_revisions');
-    allRevis.forEach(verifyRevision.bind(null, { topAnno, mongoId }));
+    const allTopRevis = popProp('_revisions');
+    allTopRevis.forEach(verifyRevision.bind(null, {
+      topAnno,
+      mongoId,
+      allTopRevis,
+    }));
 
     const tgt = guessSubjectTarget(topAnno);
     const meta = {
