@@ -3,57 +3,15 @@
 import 'p-fatal';
 import 'usnam-pmb';
 
-// import promiseFs from 'nofs';
-// import getOwn from 'getown';
 import objPop from 'objpop';
 import equal from 'equal-pmb';
-import mustBe from 'typechecks-pmb/must-be.js';
-import vTry from 'vtry';
 
 
 import trafoCli from './trafoCli.mjs';
 import guessSubjectTarget from './guessSubjectTarget.mjs';
 import pgUtil from './pgUtil.mjs';
+import verify from './libVerify.mjs';
 
-const annoBaseUrl = 'https://anno.ub.uni-heidelberg.de/anno/';
-
-
-function verifyReviUrl(pop, key, slug) {
-  pop.mustBe([['oneOf', [
-    undefined,
-    annoBaseUrl + slug,
-    annoBaseUrl + 'anno/' + slug,
-  ]]], key);
-}
-
-
-function verifyRevision(how, origRevi, reviIdx) {
-  vTry(function fallibleVerifyRevision() {
-    const {
-      topAnno,
-      mongoId,
-      // allTopRevis,
-    } = how;
-    const revi = { ...origRevi };
-    const popRevi = objPop.d(revi, { mustBe });
-    const reviNum = reviIdx + 1;
-
-    verifyReviUrl(popRevi, 'id', mongoId + '~' + reviNum);
-    verifyReviUrl(popRevi, 'versionOf', mongoId);
-    popRevi.mustBe([['oneOf', [
-      undefined,
-      (topAnno.doi && (topAnno.doi + '_' + reviNum)),
-    ]]], 'doi');
-
-    Object.entries(revi).forEach(function verify([key, val]) {
-      if (val === undefined) { return; }
-      if (key === '_revisions') {
-        return val.forEach(verifyRevision.bind(null, how));
-      }
-      return equal({ [key]: val }, { [key]: topAnno[key] });
-    });
-  }, 'revi[' + reviIdx + ']')();
-}
 
 
 const jobSpec = {
@@ -64,10 +22,9 @@ const jobSpec = {
     popProp('_id');
 
     const allTopRevis = popProp('_revisions');
-    allTopRevis.forEach(verifyRevision.bind(null, {
+    allTopRevis.forEach(verify.oldRevision.bind(null, {
       topAnno,
       mongoId,
-      allTopRevis,
     }));
 
     const tgt = guessSubjectTarget(topAnno);

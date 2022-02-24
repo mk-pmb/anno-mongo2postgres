@@ -38,17 +38,18 @@ const save = {
       divePath,
       mongoId,
     } = how;
-    const remain = {
-      ...anno,
-      '@dissect.trace': { mongoId, divePath },
-    };
+    const rec = { ...anno };
 
     // Saving deeper entries will be deferred in order to ensure that
     // combinedOutput will provide the expectation data before any
     // verification candidates appear.
-    const dv = save.splitHistoryPop(how, remain, '_revisions', 'v');
-    const da = save.splitHistoryPop(how, remain, '_replies', 'a');
-    await save.json(destBase + (divePath || '_'), remain);
+    const dv = save.splitHistoryPop(how, rec, '_revisions', 'v');
+    const da = save.splitHistoryPop(how, rec, '_replies', 'a');
+    await save.json(destBase + (divePath || '_'), {
+      '_id': mongoId + '>' + divePath,
+      '@dissect.meta': { nv: dv.n || 0, na: da.n || 0 },
+      ...rec,
+    });
     await dv();
     await da();
   },
@@ -69,6 +70,7 @@ const save = {
         how.job.counters.add(key);
       });
     }
+    Object.assign(deferredSave, { n });
     return deferredSave;
   },
 
@@ -79,7 +81,7 @@ const save = {
 
 const jobSpec = {
 
-  async eachToplevelAnno(anno, mongoId, job) {
+  async eachToplevelRecord(anno, mongoId, job) {
     mustBe.nest('Mongo ID', mongoId);
     job.hopefullyUniqueThings.add('mongoId:' + mongoId);
     const tgt = guessSubjectTarget(anno);
