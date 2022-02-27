@@ -23,7 +23,7 @@ const jobSpec = {
 
     const allTopRevis = popProp('_revisions');
     allTopRevis.forEach(verify.oldRevision.bind(null, {
-      topAnno,
+      expectedData: topAnno,
       mongoId,
     }));
 

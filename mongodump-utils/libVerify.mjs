@@ -4,6 +4,7 @@ import objPop from 'objpop';
 import equal from 'equal-pmb';
 import mustBe from 'typechecks-pmb/must-be.js';
 import vTry from 'vtry';
+import makeFilter from 'filter-container-entries-pmb';
 
 
 
@@ -11,6 +12,13 @@ import vTry from 'vtry';
 const veri = {
 
   annoBaseUrl: 'https://anno.ub.uni-heidelberg.de/anno/',
+
+  filterUnconfirmed: makeFilter({
+    dive: 'confirmed',
+    negate: true,
+    empty: false,
+    outFmt: 'dict',
+  }),
 
   reviUrl(pop, key, slug) {
     pop.mustBe([['oneOf', [
@@ -24,7 +32,7 @@ const veri = {
   oldRevision(how, origRevi, reviIdx) {
     vTry(function fallibleVerifyRevision() {
       const {
-        topAnno,
+        expectedData,
         mongoId,
       } = how;
       const revi = { ...origRevi };
@@ -35,21 +43,24 @@ const veri = {
       veri.reviUrl(popRevi, 'versionOf', mongoId);
       popRevi.mustBe([['oneOf', [
         undefined,
-        (topAnno.doi && (topAnno.doi + '_' + reviNum)),
+        (expectedData.doi && (expectedData.doi + '_' + reviNum)),
       ]]], 'doi');
 
       const allSubRevis = popRevi.mustBe('undef | ary', '_revisions');
       (allSubRevis || []).forEach(veri.oldRevision.bind(null, how));
 
-      veri.expectHasAllTheContentsFrom(topAnno, revi);
+      veri.expectHasAllTheContentsFrom(expectedData, revi);
     }, 'revi[' + reviIdx + ']')();
   },
 
 
   expectHasAllTheContentsFrom(allKnownContent, excerpt) {
+    mustBe('nonEmpty obj', 'allKnownContent')(allKnownContent);
+    mustBe('nonEmpty obj', 'excerpt')(excerpt);
     Object.entries(excerpt).forEach(function verify([key, val]) {
       if (val === undefined) { return; }
-      return equal({ [key]: val }, { [key]: allKnownContent[key] });
+      equal.named.deepStrictEqual("Excerpt property '" + key
+        + "' (+) differs from expectation (-)", val, allKnownContent[key]);
     });
   },
 

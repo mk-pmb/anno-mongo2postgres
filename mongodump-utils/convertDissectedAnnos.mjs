@@ -21,8 +21,8 @@ let annoCache = {};
 
 const conv = {
 
-  async eachToplevelRecord(origAnno, recId) {
-    const anno = { data: { ...origAnno } };
+  async eachToplevelRecord(origAnno, recId, job) {
+    const anno = { recId, data: { ...origAnno } };
     anno.pop = objPop.d(anno.data, { mustBe });
     anno.pop('_id');
     equal(anno.pop('_revisions'), undefined);
@@ -39,23 +39,52 @@ const conv = {
       annoCache = { topMongoId, topAnno: anno };
     }
 
-    anno.tgt = guessSubjectTarget(anno.data);
     anno.meta = {
       mongo_doc_id: annoCache.topMongoId,
-      subject_target: anno.tgt.url,
+      subject_target: guessSubjectTarget(anno.data).url,
       time_created: pgUtil.timestampFromIsoFmt(anno.pop('created')),
       author_local_userid: '',
     };
+    equal(anno.meta.subject_target, annoCache.topAnno.meta.subject_target);
+    if (anno.doi) {
+      throw new Error(anno.doi);
+    }
 
-    const dpNums = [];
-    const dpLetters = divePath.replace(/\d+/g, function store(m) {
-      dpNums.push(+m);
-      return '';
-    });
-    equal(dpNums.length, dpLetters.length);
-    if (!dpLetters) { return conv.topLevelAnno(anno); }
-    if (dpLetters === 'v') { return conv.topLevelRevi(anno, dpNums[0]); }
-    throw new Error('Unsupported divePath: ' + divePath);
+    const dpParsed = conv.parseDivePath(divePath);
+    if (!dpParsed) { throw new Error('Unsupported divePath: ' + divePath); }
+    anno.divePath = dpParsed;
+    if (dpParsed.versionDepth) { return conv.annoRevision(job, anno); }
+    return conv.annoContainer(job, anno);
+  },
+
+
+  parseDivePath(dpStr) {
+    const dp = { str: dpStr };
+    if (!dpStr) {
+      return {
+        ...dp,
+        commentDepth: 0,
+        commentIndices: [],
+        container: '',
+        versionDepth: 0,
+        versionIndices: [],
+      };
+    }
+
+    const [prefix, letters, ...args] = dpStr.split(/\-/);
+    equal(prefix, 'dp');
+    const m = /^(c*)(v*)$/.exec(letters);
+    if (!m) { return; }
+    equal(letters.length, args.length);
+    const cs = m[1];
+    const vs = m[2];
+    dp.commentDepth = cs.length;
+    dp.commentIndices = args.slice(0, dp.commentDepth).map(Number);
+    dp.container = cs && ['dp', cs, ...dp.commentIndices].join('-');
+    dp.versionIndices = args.slice(dp.commentDepth).map(Number);
+    dp.versionDepth = vs.length;
+    equal(dp.versionDepth, dp.versionIndices.length);
+    return dp;
   },
 
 
@@ -78,32 +107,49 @@ const conv = {
   },
 
 
-  topLevelAnno(anno) {
-    return conv.fmtInsert({ ...anno, reviNum: annoCache.topAnno.disMeta.nv });
-  },
+  annoContainer(job, anno) {
+    // "Container" is a node that is not stored as a revision.
 
-
-  topLevelRevi(anno, reviIdx) {
-    const mongoId = annoCache.topMongoId;
-    const { topAnno } = annoCache;
-
-    // Expectation: Deeply stored old revisions are exact copies of
-    // the top level revisions
-    verify.oldRevision({
-      topAnno: topAnno.data,
-      mongoId,
-    }, anno.data, reviIdx);
-
-    const reviNum = reviIdx + 1;
-    if (reviNum === topAnno.disMeta.nv) {
-      // This is the revision is the latest one. All of its content should
-      // be equal to the top level anno, so we don't need to store it.
-      verify.expectHasAllTheContentsFrom(topAnno.data, anno.data);
-      console.warn('Verified: Top anno has all data from', { mongoId, reviNum });
+    // Does it have revisions?
+    const { nv } = anno.disMeta;
+    if (nv) {
+      // We hope that its annotation data is the same as its latest revision:
+      job.assume('sameDataAsLatestRevision:' + anno.recId);
+      // We'll verify that later when we encounter the actual latest revision.
       return;
     }
 
-    return conv.fmtInsert({ ...anno, reviNum });
+    equal(nv, 0);
+    throw new Error(':TODO: Insert container as its latest revision.');
+  },
+
+
+  annoRevision(job, reviAnno) {
+    const dp = reviAnno.divePath;
+    const container = annoCache[dp.container || 'topAnno'];
+    mustBe('obj', 'container (divePath: "' + dp.container + '")')(container);
+    equal(container === reviAnno, false);
+
+    const reviIdx = dp.versionIndices.slice(-1)[0];
+    mustBe('pos0 int', 'revision index')(reviIdx);
+
+    // Expectation: Deeply stored old revisions are exact copies of the
+    // revisions stored in the container's direct property `_revision`.
+    verify.oldRevision({
+      expectedData: container.data,
+      mongoId: reviAnno.meta.mongo_doc_id,
+    }, reviAnno.data, reviIdx);
+
+    const reviNum = reviIdx + 1;
+    if (reviNum === container.disMeta.nv) {
+      // This is the revision is the latest one. All of its content should
+      // be equal to the container's data.
+      const assu = job.assume('sameDataAsLatestRevision:' + container.recId);
+      verify.expectHasAllTheContentsFrom(container.data, reviAnno.data);
+      assu.confirmed = true;
+    }
+
+    return conv.fmtInsert({ ...reviAnno, reviNum });
   },
 
 

@@ -3,23 +3,35 @@
 import parseCliOpt from 'minimist';
 import pEachSeries from 'p-each-series';
 import getOwn from 'getown';
-import CountMap from 'count-map';
+import CountMapPmb from 'count-map-pmb';
 import vTry from 'vtry';
+import deepSortObj from 'deepsortobj';
 
 
 import readRelaxedJsonFromStdin from './readRelaxedJsonFromStdin.mjs';
+import verify from './libVerify.mjs';
+
+
+function getOrAddAssumption(key, ...init) {
+  const known = this.assumptions;
+  const a = { ...known.get(key), ...init };
+  known.set(key, a);
+  return a;
+}
 
 
 async function trafoCli(origJobSpec) {
   const timeStarted = Date.now();
   const report = {
-    counters: new CountMap(),
+    counters: new CountMapPmb(),
     errorsIds: [],
   };
   const job = {
     ...origJobSpec,
     timeStarted,
-    hopefullyUniqueThings: new CountMap(),
+    hopefullyUnique: new CountMapPmb(),
+    assumptions: new Map(),
+    assume: getOrAddAssumption,
     ...report,
   };
   const cliOpt = parseCliOpt(process.argv.slice(2));
@@ -49,16 +61,16 @@ async function trafoCli(origJobSpec) {
     }
   });
 
-  const dupes = job.hopefullyUniqueThings.entries().reduce((dup, ent) => {
-    const [x, n] = ent;
-    if (n > 1) { dup[x] = n; } // eslint-disable-line no-param-reassign
-    return dup;
-  }, {});
   const timeFinished = Date.now();
   const durationMsec = timeFinished - timeStarted;
+
+  const dupes = job.hopefullyUnique.rangeFilter(2).toDict({ empty: false });
+  const unconfirmedAssumptions = verify.filterUnconfirmed(job.assumptions);
+
   Object.assign(report, {
     nSliced,
-    counters: Object.fromEntries(job.counters.entries()),
+    counters: deepSortObj(Object.fromEntries(job.counters.entries())),
+    unconfirmedAssumptions,
     dupes,
     remainMaxErr,
   });

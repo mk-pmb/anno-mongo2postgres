@@ -5,12 +5,15 @@
 function lint_and_run () {
   export LANG{,UAGE}=en_US.UTF-8  # make error messages search engine-friendly
   local SELFPATH="$(readlink -m -- "$BASH_SOURCE"/..)"
+
+  if [ "$1" == '>' ]; then shift; exec >"$1" || return $?; shift; fi
+
   local BFN="$1"; shift
   BFN="${BFN%.mjs}"
   local MJS="$BFN.mjs"
   [[ "$MJS" == */* ]] || MJS="$SELFPATH/$MJS"
   [ -f "$MJS" ] || return 4$(echo "E: no such file: $MJS" >&2)
-  cwd+exec "$SELFPATH" elp || return $?
+  cwd+exec "$SELFPATH" elp >&2 || return $?
   nodemjs "$MJS" "$@" \
     2> >(unbuffered tee -- "$SELFPATH/tmp.$BFN.err" >&2) \
     > >(unbuffered tee -- "$SELFPATH/tmp.$BFN.txt") \
