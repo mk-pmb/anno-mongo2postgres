@@ -6,6 +6,7 @@ import mustBe from 'typechecks-pmb/must-be.js';
 import vTry from 'vtry';
 import makeFilter from 'filter-container-entries-pmb';
 
+const namedEqual = equal.named.deepStrictEqual;
 
 
 
@@ -69,8 +70,34 @@ const veri = {
     mustBe('nonEmpty obj', 'excerpt')(excerpt);
     Object.entries(excerpt).forEach(function verify([key, val]) {
       if (val === undefined) { return; }
-      equal.named.deepStrictEqual("Excerpt property '" + key
-        + "' (+) differs from expectation (-)", val, allKnownContent[key]);
+      const want = allKnownContent[key];
+      const explain = ("Excerpt property '" + key
+        + "' (+) differs from expectation (-)");
+      if (key === 'body') {
+        return vTry(veri.expectSameBodies, explain)(val, want);
+      }
+      namedEqual(explain, val, want);
+    });
+  },
+
+
+  expectSameBodies(origAc, origEx) {
+    const acs = [].concat(origAc);
+    const exs = [].concat(origEx);
+    namedEqual('Number of body parts', acs.length, exs.length);
+
+    function cmpPart(ac, ex) {
+      const act = (ac && typeof ac);
+      if (act !== 'object') { return equal(ac, ex); }
+      namedEqual('type', act, (ex && typeof ex));
+      namedEqual('everything except value',
+        { ...ac, value: null },
+        { ...ex, value: null });
+      namedEqual('value', ac.value, ex.value);
+    }
+
+    acs.forEach(function cmpEach(ac, idx) {
+      vTry(cmpPart, 'body[' + idx + ']')(ac, exs[idx]);
     });
   },
 
