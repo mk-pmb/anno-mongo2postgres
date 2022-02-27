@@ -8,7 +8,7 @@ import 'usnam-pmb';
 import objPop from 'objpop';
 import equal from 'equal-pmb';
 import mustBe from 'typechecks-pmb/must-be.js';
-// import vTry from 'vtry';
+import vTry from 'vtry';
 
 
 import trafoCli from './trafoCli.mjs';
@@ -78,6 +78,7 @@ const conv = {
     equal(letters.length, args.length);
     const cs = m[1];
     const vs = m[2];
+    dp.typeLettes = { all: letters, cs, vs };
     dp.commentDepth = cs.length;
     dp.commentIndices = args.slice(0, dp.commentDepth).map(Number);
     dp.container = cs && ['dp', cs, ...dp.commentIndices].join('-');
@@ -88,20 +89,25 @@ const conv = {
   },
 
 
-  fmtInsert(anno) {
-    const reviId = mustBe('pos int', 'reviNum')(anno.reviNum).toFixed(0);
-    const { topMongoId } = annoCache;
-    const title = String(anno.data.title || '').trim();
-    verify.reviUrl(anno.pop, 'id', topMongoId);
+  fmtInsert(anno, auxMeta) {
+    const auxPop = objPop(auxMeta, { mustBe }).mustBe;
+    const reviNum = auxPop('pos int', 'reviNum').toFixed(0);
+    const ctnrAnnoId = auxPop('nonEmpty str', 'containerAnnoId');
+
     const rec = {
       ...anno.meta,
-      anno_id: topMongoId + '~' + reviId,
-      revision_id: reviId,
-      details: {
-        ...anno.data,
-        title,
-      },
+      anno_id: ctnrAnnoId + '~' + reviNum,
+      revision_id: reviNum,
     };
+
+    verify.reviUrl(anno.pop, 'id', rec.anno_id);
+
+    const title = String(anno.data.title || '').trim();
+    rec.details = {
+      ...anno.data,
+      title,
+    };
+
     const ins = pgUtil.fmtInsert('anno', rec);
     console.log(ins);
   },
@@ -127,29 +133,49 @@ const conv = {
   annoRevision(job, reviAnno) {
     const dp = reviAnno.divePath;
     const container = annoCache[dp.container || 'topAnno'];
-    mustBe('obj', 'container (divePath: "' + dp.container + '")')(container);
+    mustBe('obj', 'container (dp: "' + dp.container + '")')(container);
     equal(container === reviAnno, false);
+
+    const mongoId = reviAnno.meta.mongo_doc_id;
+    const commentNums = dp.commentIndices.map(i => i + 1);
+    const containerAnnoId = [mongoId, ...commentNums].join('.');
+    if (container.id) { equal(container.id, containerAnnoId); }
 
     const reviIdx = dp.versionIndices.slice(-1)[0];
     mustBe('pos0 int', 'revision index')(reviIdx);
 
-    // Expectation: Deeply stored old revisions are exact copies of the
-    // revisions stored in the container's direct property `_revision`.
-    verify.oldRevision({
-      expectedData: container.data,
-      mongoId: reviAnno.meta.mongo_doc_id,
-    }, reviAnno.data, reviIdx);
+    if (dp.versionDepth > 1) {
+      // Expectation: Deeply stored old revisions are exact copies of the
+      // revisions stored in the container's direct property `_revision`.
+      const shallowReviDp = [
+        'dp',
+        dp.typeLettes.cs + 'v',
+        ...dp.commentIndices,
+        reviIdx,
+      ].join('-');
+      const shallowRevi = annoCache[shallowReviDp];
+      mustBe('obj', 'shallowRevi (dp: "' + shallowReviDp + '")')(shallowRevi);
+
+      equal.named.deepStrictEqual('Deep revision is redundant copy',
+        reviAnno.data, shallowRevi.data);
+      // The above expectation has been verified: The deep revision
+      // is a redundant copy, so can safely discard it.
+      return;
+    }
 
     const reviNum = reviIdx + 1;
     if (reviNum === container.disMeta.nv) {
       // This is the revision is the latest one. All of its content should
       // be equal to the container's data.
       const assu = job.assume('sameDataAsLatestRevision:' + container.recId);
-      verify.expectHasAllTheContentsFrom(container.data, reviAnno.data);
+      vTry(verify.oldRevision, 'Compare latest revision with container')({
+        expectedData: container.data,
+        containerAnnoId,
+      }, reviAnno.data, reviIdx);
       assu.confirmed = true;
     }
 
-    return conv.fmtInsert({ ...reviAnno, reviNum });
+    return conv.fmtInsert(reviAnno, { containerAnnoId, reviNum });
   },
 
 

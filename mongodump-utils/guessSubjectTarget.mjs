@@ -6,6 +6,12 @@ const safeUrlRgx = /^https?:\/{2}([a-z0-9_:\.\/\-]+)$/;
 
 const gpt = function guessSubjectTarget(anno) {
   let tgt = anno.target;
+  if (Array.isArray(tgt)) {
+    const n = tgt.length;
+    if (n < 1) { throw new Error('Found no target'); }
+    if (n > 1) { throw new Error('Found too many targets'); }
+    tgt = tgt[0];
+  }
   tgt = (tgt.scope
     || tgt.id
     || tgt.source

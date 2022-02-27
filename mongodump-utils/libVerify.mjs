@@ -21,6 +21,7 @@ const veri = {
   }),
 
   reviUrl(pop, key, slug) {
+    mustBe.nest('slug', slug);
     pop.mustBe([['oneOf', [
       undefined,
       veri.annoBaseUrl + slug,
@@ -30,27 +31,36 @@ const veri = {
 
 
   oldRevision(how, origRevi, reviIdx) {
+    const {
+      expectedData,
+      containerAnnoId,
+    } = how;
     vTry(function fallibleVerifyRevision() {
-      const {
-        expectedData,
-        mongoId,
-      } = how;
+      mustBe.nest('containerAnnoId', containerAnnoId);
       const revi = { ...origRevi };
       const popRevi = objPop.d(revi, { mustBe });
       const reviNum = reviIdx + 1;
 
-      veri.reviUrl(popRevi, 'id', mongoId + '~' + reviNum);
-      veri.reviUrl(popRevi, 'versionOf', mongoId);
-      popRevi.mustBe([['oneOf', [
-        undefined,
-        (expectedData.doi && (expectedData.doi + '_' + reviNum)),
-      ]]], 'doi');
+      veri.reviUrl(popRevi, 'id', containerAnnoId + '~' + reviNum);
+      veri.reviUrl(popRevi, 'versionOf', containerAnnoId);
+
+      const exDoi = expectedData.doi;
+      const reviDoi = popRevi('doi');
+      if (exDoi) {
+        mustBe([['oneOf', [
+          undefined,
+          (exDoi + '~' + reviNum),
+          (exDoi + '_' + reviNum),
+        ]]], 'DOI-bearing annotation > revision > doi')(reviDoi);
+      } else {
+        mustBe('undef', 'DOI-less annotation > revision > doi')(reviDoi);
+      }
 
       const allSubRevis = popRevi.mustBe('undef | ary', '_revisions');
       (allSubRevis || []).forEach(veri.oldRevision.bind(null, how));
 
       veri.expectHasAllTheContentsFrom(expectedData, revi);
-    }, 'revi[' + reviIdx + ']')();
+    }, containerAnnoId + ' > revi[' + reviIdx + ']')();
   },
 
 

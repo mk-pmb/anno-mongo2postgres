@@ -38,16 +38,18 @@ async function trafoCli(origJobSpec) {
   console.error('CLI options:', cliOpt);
   const data = await readRelaxedJsonFromStdin(cliOpt);
   const nSliced = data.length;
-
   const maxErr = Math.max((+cliOpt.maxerr || 0), 0) || 5;
+  const progressInterval = (+cliOpt.prgi || 1e3);
   let remainMaxErr = maxErr;
   const { eachToplevelRecord } = job;
   await pEachSeries([].concat(data), async function topLevelAnno(anno, idx) {
     if (!remainMaxErr) { return; }
     const mongoId = getOwn(anno, '_id');
     const progress = idx / nSliced;
-    if ((idx % 1e3) === 0) { console.error({ idx, progress }, { mongoId }); }
-    const trace = '@' + idx + '=' + mongoId;
+    if ((idx % progressInterval) === 0) {
+      console.error({ idx, progress }, { mongoId });
+    }
+    const trace = '@' + idx + ':' + mongoId;
     try {
       await vTry.pr(eachToplevelRecord, [trace])(anno, mongoId, job);
       report.counters.add('success');
