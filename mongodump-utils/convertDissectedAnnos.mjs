@@ -3,7 +3,7 @@
 import 'p-fatal';
 import 'usnam-pmb';
 
-// import promiseFs from 'nofs';
+import promiseFs from 'nofs';
 // import getOwn from 'getown';
 import objPop from 'objpop';
 import equal from 'equal-pmb';
@@ -18,10 +18,21 @@ import verify from './libVerify.mjs';
 
 
 let annoCache = {};
+const skipMongoIds = new Set();
+
 
 const conv = {
 
+  async cliInit(cliOpt) {
+    (await promiseFs.readFile(cliOpt['exclude-mongo-ids-from-file']
+      || '/dev/null', 'UTF-8')).split(/\n/).forEach(x => skipMongoIds.add(x));
+  },
+
+
   async eachToplevelRecord(origAnno, recId, job) {
+    const [topMongoId, divePath] = (recId + '>').split(/>/);
+    if (skipMongoIds.has(topMongoId)) { return job.counters.add('skipped'); }
+
     const anno = { recId, data: { ...origAnno } };
     anno.pop = objPop.d(anno.data, { mustBe });
     anno.pop('_id');
@@ -30,7 +41,6 @@ const conv = {
     equal(anno.pop('type'), ['Annotation']);
     anno.disMeta = anno.pop('@dissect.meta');
 
-    const [topMongoId, divePath] = (recId + '>').split(/>/);
     if (topMongoId === annoCache.topMongoId) {
       if (annoCache[divePath]) { throw new Error('Duplicate divepath'); }
       annoCache[divePath] = anno;

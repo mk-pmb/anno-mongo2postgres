@@ -11,6 +11,8 @@ import deepSortObj from 'deepsortobj';
 import readRelaxedJsonFromStdin from './readRelaxedJsonFromStdin.mjs';
 import verify from './libVerify.mjs';
 
+const doNothing = Boolean;
+
 
 function getOrAddAssumption(key, ...init) {
   const known = this.assumptions;
@@ -36,6 +38,8 @@ async function trafoCli(origJobSpec) {
   };
   const cliOpt = parseCliOpt(process.argv.slice(2));
   console.error('CLI options:', cliOpt);
+  await (job.cliInit || doNothing)(cliOpt, job);
+
   const data = await readRelaxedJsonFromStdin(cliOpt);
   const nSliced = data.length;
   const maxErr = Math.max((+cliOpt.maxerr || 0), 0) || 5;
