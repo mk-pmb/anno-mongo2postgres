@@ -17,6 +17,8 @@ import pgUtil from './pgUtil.mjs';
 import verify from './libVerify.mjs';
 
 
+const doNothing = Boolean;
+
 let annoCache = {};
 const skipMongoIds = new Set();
 
@@ -28,6 +30,7 @@ const conv = {
       || '/dev/null', 'UTF-8')).split(/\n/).forEach(x => skipMongoIds.add(x));
   },
 
+  hotfixes: {},
 
   async eachToplevelRecord(origAnno, recId, job) {
     const [topMongoId, divePath] = (recId + '>').split(/>/);
@@ -48,6 +51,8 @@ const conv = {
       mustBe('eeq:""', 'New top-level anno divePath')(divePath);
       annoCache = { topMongoId, topAnno: anno };
     }
+
+    await (job.hotfixes[recId] || doNothing)(anno);
 
     anno.meta = {
       mongo_doc_id: annoCache.topMongoId,
@@ -191,4 +196,6 @@ const conv = {
 
 };
 
-trafoCli(conv);
+const trafoPr = trafoCli(conv);
+
+export default trafoPr;

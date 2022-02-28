@@ -1,6 +1,7 @@
 // -*- coding: utf-8, tab-width: 2 -*-
 
 import parseCliOpt from 'minimist';
+import pDelay from 'delay';
 import pEachSeries from 'p-each-series';
 import getOwn from 'getown';
 import CountMapPmb from 'count-map-pmb';
@@ -22,23 +23,43 @@ function getOrAddAssumption(key, ...init) {
 }
 
 
-async function trafoCli(origJobSpec) {
-  const timeStarted = Date.now();
+function trafoCli(origJobSpec) {
+  const cliOpt = parseCliOpt(process.argv.slice(2));
+  console.error('CLI options:', cliOpt);
+
   const report = {
     counters: new CountMapPmb(),
     errorsIds: [],
   };
   const job = {
     ...origJobSpec,
-    timeStarted,
+    cliOpt,
     hopefullyUnique: new CountMapPmb(),
     assumptions: new Map(),
     assume: getOrAddAssumption,
     ...report,
   };
-  const cliOpt = parseCliOpt(process.argv.slice(2));
-  console.error('CLI options:', cliOpt);
-  await (job.cliInit || doNothing)(cliOpt, job);
+  const coreArgs = {
+    job,
+    report,
+  };
+
+  const trafoPr = pDelay(10).then(() => trafoCli.core(coreArgs));
+  // ^-- The delay is a hacky way to allow simple monkey patches.
+  Object.assign(trafoPr, coreArgs);
+  return trafoPr;
+}
+
+
+trafoCli.core = async function trafoCliCore(coreArgs) {
+  const {
+    job,
+    report,
+  } = coreArgs;
+  const { cliOpt } = job;
+
+  const timeStarted = Date.now();
+  await (job.cliInit || doNothing)(job);
 
   const data = await readRelaxedJsonFromStdin(cliOpt);
   const nSliced = data.length;
@@ -81,6 +102,7 @@ async function trafoCli(origJobSpec) {
     remainMaxErr,
   });
   Object.assign(job, {
+    timeStarted,
     timeFinished,
     durationMsec,
     ...report,
@@ -89,7 +111,7 @@ async function trafoCli(origJobSpec) {
     durationMinutes: durationMsec / 60e3,
     ...report,
   });
-}
+};
 
 
 export default trafoCli;
