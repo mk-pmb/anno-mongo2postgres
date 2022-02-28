@@ -31,6 +31,8 @@ const conv = {
   },
 
   hotfixes: {},
+  creatorAliases: {},
+  skipMongoIds,
 
   async eachToplevelRecord(origAnno, recId, job) {
     const [topMongoId, divePath] = (recId + '>').split(/>/);
@@ -50,8 +52,10 @@ const conv = {
     } else {
       mustBe('eeq:""', 'New top-level anno divePath')(divePath);
       annoCache = { topMongoId, topAnno: anno };
+      job.hint('latestTopAnnoRecIdx', job.topRecIdx);
     }
 
+    await (job.hotfixes[topMongoId + '>*'] || doNothing)(anno);
     await (job.hotfixes[recId] || doNothing)(anno);
 
     anno.meta = {
@@ -61,9 +65,6 @@ const conv = {
       author_local_userid: '',
     };
     equal(anno.meta.subject_target, annoCache.topAnno.meta.subject_target);
-    if (anno.doi) {
-      throw new Error(anno.doi);
-    }
 
     const dpParsed = conv.parseDivePath(divePath);
     if (!dpParsed) { throw new Error('Unsupported divePath: ' + divePath); }
@@ -156,7 +157,8 @@ const conv = {
     const containerAnnoId = [mongoId, ...commentNums].join('.');
     if (container.id) { equal(container.id, containerAnnoId); }
 
-    const reviIdx = dp.versionIndices.slice(-1)[0];
+    // const reviIdx = dp.versionIndices.slice(-1)[0];
+    const reviIdx = dp.versionIndices[0];
     mustBe('pos0 int', 'revision index')(reviIdx);
 
     if (dp.versionDepth > 1) {
@@ -169,12 +171,21 @@ const conv = {
         reviIdx,
       ].join('-');
       const shallowRevi = annoCache[shallowReviDp];
-      mustBe('obj', 'shallowRevi (dp: "' + shallowReviDp + '")')(shallowRevi);
+      const shallowTrace = 'shallowRevi (dp: "' + shallowReviDp + '")';
+      mustBe('obj', shallowTrace)(shallowRevi);
 
-      equal.named.deepStrictEqual('Deep revision is redundant copy',
-        reviAnno.data, shallowRevi.data);
-      // The above expectation has been verified: The deep revision
-      // is a redundant copy, so can safely discard it.
+      // °°°° In an ideal world, …
+      // °  equal.named.deepStrictEqual('Deep revision is redundant copy',
+      // °    reviAnno.data, shallowRevi.data);
+      // °  // The above expectation has been verified: The deep revision
+      // °  // is a redundant copy, so can safely discard it.
+      // °°°° … our data would be this clean.
+      // Fortunately, for discarding the reviAnno, we can settle with a
+      // lesser assumption:
+      vTry(verify.expectHasAllTheContentsFrom,
+        'Expect: ' + shallowTrace + ' has all data from deep revi'
+      )(shallowRevi.data, reviAnno.data, job);
+
       return;
     }
 
@@ -183,9 +194,11 @@ const conv = {
       // This is the revision is the latest one. All of its content should
       // be equal to the container's data.
       const assu = job.assume('sameDataAsLatestRevision:' + container.recId);
-      vTry(verify.oldRevision, 'Compare latest revision with container')({
+      vTry(verify.oldRevision, 'Latest revision (+) =/= container (-)')({
         expectedData: container.data,
         containerAnnoId,
+        job,
+        reviDivePath: dp,
       }, reviAnno.data, reviIdx);
       assu.confirmed = true;
     }

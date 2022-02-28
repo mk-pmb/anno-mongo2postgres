@@ -24,6 +24,7 @@ const rr = async function readRelaxedJsonFromStdin(opt) {
   const nSliced = data.length;
   console.error('Number of top-level records after slicing:', nSliced);
 
+  data.offset = tlrSkip;
   return data;
 };
 

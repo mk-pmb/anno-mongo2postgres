@@ -15,10 +15,12 @@ function divecmp () {
     s~^\.*~.~
     s~\.([0-9]+)~\[\1\]~g
     '))"
+  local ANNO_ID_A="$(jq --raw-output ".[$REC_IDX_A]._id" -- "$JSON_FILE")"
+  local ANNO_ID_B="$(jq --raw-output ".[$REC_IDX_B]._id" -- "$JSON_FILE")"
   colordiff -sU 9009009 \
-    --label "[$REC_IDX_A]$JSON_PATH" <(
+    --label "[$REC_IDX_A]$JSON_PATH | $ANNO_ID_A" <(
       jq --raw-output ".[$REC_IDX_A]$JSON_PATH" -- "$JSON_FILE" | prettify) \
-    --label "[$REC_IDX_B]$JSON_PATH" <(
+    --label "[$REC_IDX_B]$JSON_PATH | $ANNO_ID_B" <(
       jq --raw-output ".[$REC_IDX_B]$JSON_PATH" -- "$JSON_FILE" | prettify) \
     | less --RAW-CONTROL-CHARS --chop-long-lines
 }

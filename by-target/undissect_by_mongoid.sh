@@ -8,7 +8,7 @@ function undissect () {
   cd -- "$SELFPATH" || return $?
 
   local MONGO_ID="$1"
-  local BFN="tmp.$1"
+  local BFN="tmp.$FUNCNAME"
   find [a-z]*.*/ -name "*.$1.*.json" \
     | sed -re 's~(\.)(dp\-.json)$~\1\a\2~' \
     | LANG=C sort \

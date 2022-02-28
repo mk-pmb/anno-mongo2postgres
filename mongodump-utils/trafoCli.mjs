@@ -30,6 +30,7 @@ function trafoCli(origJobSpec) {
   const report = {
     counters: new CountMapPmb(),
     errorsIds: [],
+    hints: {},
   };
   const job = {
     ...origJobSpec,
@@ -37,6 +38,18 @@ function trafoCli(origJobSpec) {
     hopefullyUnique: new CountMapPmb(),
     assumptions: new Map(),
     assume: getOrAddAssumption,
+    hint(k, v, w) {
+      const o = this.hints[k];
+      if (v !== undefined) {
+        this.hints[k] = v;
+        return v;
+      }
+      if ((o === undefined) && (w !== undefined)) {
+        this.hints[k] = w;
+        return w;
+      }
+      return o;
+    },
     ...report,
   };
   const coreArgs = {
@@ -70,6 +83,7 @@ trafoCli.core = async function trafoCliCore(coreArgs) {
   await pEachSeries([].concat(data), async function topLevelAnno(anno, idx) {
     if (!remainMaxErr) { return; }
     const mongoId = getOwn(anno, '_id');
+    job.topRecIdx = data.offset + idx;
     const progress = idx / nSliced;
     if ((idx % progressInterval) === 0) {
       console.error({ idx, progress }, { mongoId });

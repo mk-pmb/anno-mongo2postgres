@@ -1,6 +1,7 @@
 // -*- coding: utf-8, tab-width: 2 -*-
 
 import objPop from 'objpop';
+import getOwn from 'getown';
 import equal from 'equal-pmb';
 import mustBe from 'typechecks-pmb/must-be.js';
 import vTry from 'vtry';
@@ -35,7 +36,9 @@ const veri = {
     const {
       expectedData,
       containerAnnoId,
+      job,
     } = how;
+    mustBe('obj', 'how.job')(job);
     vTry(function fallibleVerifyRevision() {
       mustBe.nest('containerAnnoId', containerAnnoId);
       const revi = { ...origRevi };
@@ -44,28 +47,53 @@ const veri = {
 
       veri.reviUrl(popRevi, 'id', containerAnnoId + '~' + reviNum);
       veri.reviUrl(popRevi, 'versionOf', containerAnnoId);
-
-      const exDoi = expectedData.doi;
-      const reviDoi = popRevi('doi');
-      if (exDoi) {
-        mustBe([['oneOf', [
-          undefined,
-          (exDoi + '~' + reviNum),
-          (exDoi + '_' + reviNum),
-        ]]], 'DOI-bearing annotation > revision > doi')(reviDoi);
-      } else {
-        mustBe('undef', 'DOI-less annotation > revision > doi')(reviDoi);
-      }
+      veri.oldReviDoi(expectedData.doi, popRevi('doi'), reviNum, how);
 
       const allSubRevis = popRevi.mustBe('undef | ary', '_revisions');
       (allSubRevis || []).forEach(veri.oldRevision.bind(null, how));
 
-      veri.expectHasAllTheContentsFrom(expectedData, revi);
+      veri.expectHasAllTheContentsFrom(expectedData, revi, job);
     }, containerAnnoId + ' > revi[' + reviIdx + ']')();
   },
 
 
-  expectHasAllTheContentsFrom(allKnownContent, excerpt) {
+  oldReviDoi(exDoi, reviDoi, reviNum, how) {
+    if (!exDoi) {
+      mustBe('undef', 'DOI-less annotation > revision > doi')(reviDoi);
+      return;
+    }
+
+    let doiErr;
+    try {
+      mustBe([['oneOf', [
+        undefined,
+        (exDoi + '~' + reviNum),
+        (exDoi + '_' + reviNum),
+      ]]], 'DOI-bearing annotation > revision > doi')(reviDoi);
+      return;
+    } catch (caught) {
+      doiErr = caught;
+    }
+
+    const rpr = how.job.badDoiReportPrefix;
+    if (rpr && reviDoi.startsWith(rpr)) {
+      const caid = how.containerAnnoId;
+      const reviSuf = reviDoi.slice(rpr.length + caid.length);
+      const reviDp = how.reviDivePath.str;
+      // console.warn({ containerAnnoId, exSuf, reviSuf, reviDp });
+      const badDoiLine = ('["' + caid + '", '
+        + reviDp.replace(/^dp-v-/, '    ').slice(-3)
+        + ', "' + reviSuf + '"]');
+      how.job.hint('badDoi', undefined, []).push(badDoiLine);
+      how.job.counters.add('unacknowledgedBadDoi');
+      return;
+    }
+
+    throw doiErr;
+  },
+
+
+  expectHasAllTheContentsFrom(allKnownContent, excerpt, job) {
     mustBe('nonEmpty obj', 'allKnownContent')(allKnownContent);
     mustBe('nonEmpty obj', 'excerpt')(excerpt);
     Object.entries(excerpt).forEach(function verify([key, val]) {
@@ -75,6 +103,9 @@ const veri = {
         + "' (+) differs from expectation (-)");
       if (key === 'body') {
         return vTry(veri.expectSameBodies, explain)(val, want);
+      }
+      if (key === 'creator') {
+        return vTry(veri.expectSameCreator, explain)(val, want, job);
       }
       namedEqual(explain, val, want);
     });
@@ -99,6 +130,21 @@ const veri = {
     acs.forEach(function cmpEach(ac, idx) {
       vTry(cmpPart, 'body[' + idx + ']')(ac, exs[idx]);
     });
+  },
+
+
+  expectSameCreator(ac, ex, job) {
+    const cas = job.creatorAliases;
+    if (cas && ex && ex.id && ac && ac.id) {
+      if (ac.id === ex.id) { return; }
+      const alias = getOwn(cas, ac.id);
+      if (alias && (ex.id === alias)) {
+        job.counters.add('usingCreatorAlias');
+        job.counters.add('usingCreatorAlias:' + alias);
+        return;
+      }
+    }
+    equal(ac, ex);
   },
 
 
