@@ -23,6 +23,20 @@ function getOrAddAssumption(key, ...init) {
 }
 
 
+function jobHintMtd(k, v, w) {
+  const o = this.hints[k];
+  if (v !== undefined) {
+    this.hints[k] = v;
+    return v;
+  }
+  if ((o === undefined) && (w !== undefined)) {
+    this.hints[k] = w;
+    return w;
+  }
+  return o;
+}
+
+
 function trafoCli(origJobSpec) {
   const cliOpt = parseCliOpt(process.argv.slice(2));
   console.error('CLI options:', cliOpt);
@@ -38,18 +52,7 @@ function trafoCli(origJobSpec) {
     hopefullyUnique: new CountMapPmb(),
     assumptions: new Map(),
     assume: getOrAddAssumption,
-    hint(k, v, w) {
-      const o = this.hints[k];
-      if (v !== undefined) {
-        this.hints[k] = v;
-        return v;
-      }
-      if ((o === undefined) && (w !== undefined)) {
-        this.hints[k] = w;
-        return w;
-      }
-      return o;
-    },
+    hint: jobHintMtd,
     ...report,
   };
   const coreArgs = {
