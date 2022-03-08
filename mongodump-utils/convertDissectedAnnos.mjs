@@ -3,7 +3,6 @@
 import 'p-fatal';
 import 'usnam-pmb';
 
-import promiseFs from 'nofs';
 // import getOwn from 'getown';
 import objPop from 'objpop';
 import equal from 'equal-pmb';
@@ -24,11 +23,6 @@ const skipMongoIds = new Set();
 
 
 const conv = {
-
-  async cliInit(cliOpt) {
-    (await promiseFs.readFile(cliOpt['exclude-mongo-ids-from-file']
-      || '/dev/null', 'UTF-8')).split(/\n/).forEach(x => skipMongoIds.add(x));
-  },
 
   hotfixes: {},
   creatorAliases: {},
