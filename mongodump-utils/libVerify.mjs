@@ -22,12 +22,18 @@ const veri = {
     outFmt: 'dict',
   }),
 
-  reviUrl(pop, key, slug) {
-    mustBe.nest('slug', slug);
+  reviUrl(pop, key, info) {
+    const {
+      containerAnnoId,
+      reviNum,
+    } = info;
+    mustBe.nest('containerAnnoId', containerAnnoId);
+    const reviSuffix = (reviNum === undefined ? '' : '~' + reviNum);
+    const suf = containerAnnoId + reviSuffix;
     pop.mustBe([['oneOf', [
       undefined,
-      veri.annoBaseUrl + slug,
-      veri.annoBaseUrl + 'anno/' + slug,
+      veri.annoBaseUrl + suf,
+      veri.annoBaseUrl + 'anno/' + suf,
     ]]], key);
   },
 
@@ -40,13 +46,12 @@ const veri = {
     } = how;
     mustBe('obj', 'how.job')(job);
     vTry(function fallibleVerifyRevision() {
-      mustBe.nest('containerAnnoId', containerAnnoId);
       const revi = { ...origRevi };
       const popRevi = objPop.d(revi, { mustBe });
       const reviNum = reviIdx + 1;
 
-      veri.reviUrl(popRevi, 'id', containerAnnoId + '~' + reviNum);
-      veri.reviUrl(popRevi, 'versionOf', containerAnnoId);
+      veri.reviUrl(popRevi, 'id', { containerAnnoId, reviNum });
+      veri.reviUrl(popRevi, 'versionOf', { containerAnnoId });
       veri.oldReviDoi(expectedData.doi, popRevi('doi'), reviNum, how);
 
       const allSubRevis = popRevi.mustBe('undef | ary', '_revisions');

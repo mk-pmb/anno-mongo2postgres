@@ -110,7 +110,9 @@ const conv = {
   fmtInsert(anno, auxMeta) {
     const auxPop = objPop(auxMeta, { mustBe }).mustBe;
     const reviNum = auxPop('pos int', 'reviNum').toFixed(0);
-    const ctnrAnnoId = auxPop('nonEmpty str', 'containerAnnoId');
+    const containerAnnoId = auxPop('nonEmpty str', 'containerAnnoId');
+    verify.reviUrl(anno.pop, 'id', { containerAnnoId, reviNum });
+    const reviAddr = { anno_id: containerAnnoId, revision_id: reviNum };
 
     const rec = {
       ...anno.meta,
