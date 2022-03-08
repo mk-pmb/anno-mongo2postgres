@@ -20,10 +20,10 @@ Object.assign(job, {
   },
 
   rewriteSaveDir(origSaveDir) {
-    const sd = origSaveDir;
-    if (sd.startsWith('ubhd.sempub/provitest/')) { return; }
-    if (sd.startsWith('ubhd.digi/diglit/annotationen_test/')) { return; }
-    return sd;
+    const wts /* with trailing slash */ = origSaveDir + '/';
+    if (wts.startsWith('ubhd.sempub/provitest/')) { return; }
+    if (wts.startsWith('ubhd.digi/diglit/annotationen_test/')) { return; }
+    return origSaveDir;
   },
 
 });
