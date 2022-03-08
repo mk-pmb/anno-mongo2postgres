@@ -75,10 +75,9 @@ const conv = {
 
 
   parseDivePath(dpStr) {
-    const dp = { str: dpStr };
     if (!dpStr) {
       return {
-        ...dp,
+        str: '',
         commentDepth: 0,
         commentIndices: [],
         container: '',
@@ -94,12 +93,23 @@ const conv = {
     equal(letters.length, args.length);
     const cs = m[1];
     const vs = m[2];
-    dp.typeLettes = { all: letters, cs, vs };
-    dp.commentDepth = cs.length;
-    dp.commentIndices = args.slice(0, dp.commentDepth).map(Number);
-    dp.container = cs && ['dp', cs, ...dp.commentIndices].join('-');
-    dp.versionIndices = args.slice(dp.commentDepth).map(Number);
-    dp.versionDepth = vs.length;
+
+    const commentDepth = cs.length;
+    const commentIndices = args.slice(0, commentDepth).map(Number);
+    equal(commentDepth, commentIndices.length);
+
+    const container = (cs && ['dp', cs, ...commentIndices].join('-'));
+    // console.error({ dp: dpStr, ci: commentIndices, ctr: container });
+
+    const dp = {
+      str: dpStr,
+      typeLettes: { all: letters, cs, vs },
+      commentDepth,
+      commentIndices,
+      container,
+      versionIndices: args.slice(commentDepth).map(Number),
+      versionDepth: vs.length,
+    };
     equal(dp.versionDepth, dp.versionIndices.length);
     return dp;
   },
