@@ -193,7 +193,7 @@ const conv = {
 
     const reviNum = reviIdx + 1;
     if (reviNum === container.disMeta.nv) {
-      // This is the revision is the latest one. All of its content should
+      // This revision is the latest one. All of its content should
       // be equal to the container's data.
       const assu = job.assume('sameDataAsLatestRevision:' + container.recId);
       vTry(verify.oldRevision, 'Latest revision (+) =/= container (-)')({
