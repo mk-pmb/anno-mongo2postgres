@@ -18,13 +18,13 @@ const rr = async function readRelaxedJsonFromStdin(opt) {
   data = JSON.parse(data);
   console.error('Number of top-level records in input:', data.length);
 
-  const tlrSkip = (+opt.skip || 0);
+  const tlrOffset = (+opt.offset || 0);
   const tlrLimit = (+opt.limit || 1000);
-  data = data.slice(tlrSkip, tlrSkip + tlrLimit);
+  data = data.slice(tlrOffset, tlrOffset + tlrLimit);
   const nSliced = data.length;
   console.error('Number of top-level records after slicing:', nSliced);
 
-  data.offset = tlrSkip;
+  data.offset = tlrOffset;
   return data;
 };
 

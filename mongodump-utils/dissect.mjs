@@ -85,21 +85,24 @@ const save = {
 
 const jobSpec = {
 
+  rewriteRevHost: String,
+  rewriteSaveDir: String,
+
   async eachToplevelRecord(anno, mongoId, job) {
     mustBe.nest('Mongo ID', mongoId);
     job.hopefullyUnique.add('mongoId:' + mongoId);
     const tgt = guessSubjectTarget(anno);
     let { revHost } = tgt;
-    if (!/^[a-z]+\./.test(revHost)) { return; }
-    revHost = revHost.replace(/^de\.uni-heidelberg\.ub\./, 'ubhd.');
-    revHost = revHost.replace(/^de\.uni-heidelberg\./, 'uni-hd.');
-    if (revHost.startsWith('ubhd.serv')) { return; }
+    mustBe.nest('subjectTarget reverse hostname', revHost);
+    revHost = job.rewriteRevHost(revHost);
+    if (!revHost) { return; }
 
-    const saveDir = [
+    let saveDir = [
       revHost + (tgt.port ? '_' + tgt.port : ''),
       ...tgt.pathParts.slice(0, -1),
     ].join('/');
-    if (saveDir.startsWith('ubhd.sempub/provitest/')) { return; }
+    saveDir = job.rewriteSaveDir(saveDir);
+    if (!saveDir) { return; }
 
     const complexity = rateAnnoDepthComplexity(anno);
     job.counters.add('tlr:' + complexity);
@@ -120,4 +123,6 @@ const jobSpec = {
 
 };
 
-trafoCli(jobSpec);
+const trafoPr = trafoCli(jobSpec);
+
+export default trafoPr;

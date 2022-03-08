@@ -3,6 +3,7 @@
 import eq from 'equal-pmb';
 import objDive from 'objdive';
 
+import sharedHotfixes from './ubhd.sharedHotfixes.mjs';
 import cda from './convertDissectedAnnos.mjs';
 import creatorAliases from './creatorAliases.ubhd.json';
 import badDois from './badDois.ubhd.json';
@@ -10,9 +11,10 @@ import badDois from './badDois.ubhd.json';
 const { job } = cda;
 const {
   hotfixes,
-  skipMongoIds,
 } = job;
 
+
+sharedHotfixes.addSkips(job);
 
 const digiDoi = '10.11588/anno.diglit.';
 
@@ -54,12 +56,6 @@ reg([
   'Cd6tRIwaThmpMnetnDqJKQ>dp-cvv-0-0-0',
 ], propSed('', 'replyTo', [[/$/, '.1']]));
 
-
-
-skipMongoIds.add('787d953050996');
-skipMongoIds.add('cb219db7cbb20');
-skipMongoIds.add('CRo8W4H2RpW4l4hHcofuVQ');
-skipMongoIds.add('X2ITI56MRp-viA-H9jVV2g');
 
 
 function badDoi(mongoId, recIdSuffix, doiPrefix, badSuffix) {

@@ -19,18 +19,16 @@ import verify from './libVerify.mjs';
 const doNothing = Boolean;
 
 let annoCache = {};
-const skipMongoIds = new Set();
 
 
 const conv = {
 
   hotfixes: {},
   creatorAliases: {},
-  skipMongoIds,
 
   async eachToplevelRecord(origAnno, recId, job) {
     const [topMongoId, divePath] = (recId + '>').split(/>/);
-    if (skipMongoIds.has(topMongoId)) { return job.counters.add('skipped'); }
+    if (job.skipMongoIds.has(topMongoId)) { return job.skipRec(); }
 
     const anno = { recId, data: { ...origAnno } };
     anno.pop = objPop.d(anno.data, { mustBe });

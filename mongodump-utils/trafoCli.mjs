@@ -15,26 +15,32 @@ import verify from './libVerify.mjs';
 const doNothing = Boolean;
 
 
-function getOrAddAssumption(key, ...init) {
-  const known = this.assumptions;
-  const a = { ...known.get(key), ...init };
-  known.set(key, a);
-  return a;
-}
+const jobApi = {
 
+  assume(key, ...init) {
+    const known = this.assumptions;
+    const a = { ...known.get(key), ...init };
+    known.set(key, a);
+    return a;
+  },
 
-function jobHintMtd(k, v, w) {
-  const o = this.hints[k];
-  if (v !== undefined) {
-    this.hints[k] = v;
-    return v;
-  }
-  if ((o === undefined) && (w !== undefined)) {
-    this.hints[k] = w;
-    return w;
-  }
-  return o;
-}
+  hint(k, v, w) {
+    const o = this.hints[k];
+    if (v !== undefined) {
+      this.hints[k] = v;
+      return v;
+    }
+    if ((o === undefined) && (w !== undefined)) {
+      this.hints[k] = w;
+      return w;
+    }
+    return o;
+  },
+
+  skipRec() { this.counters.add('skipped'); },
+
+};
+
 
 
 function trafoCli(origJobSpec) {
@@ -47,12 +53,12 @@ function trafoCli(origJobSpec) {
     hints: {},
   };
   const job = {
-    ...origJobSpec,
+    skipMongoIds: new Set(),
     cliOpt,
     hopefullyUnique: new CountMapPmb(),
     assumptions: new Map(),
-    assume: getOrAddAssumption,
-    hint: jobHintMtd,
+    ...jobApi,
+    ...origJobSpec,
     ...report,
   };
   const coreArgs = {
@@ -85,8 +91,10 @@ trafoCli.core = async function trafoCliCore(coreArgs) {
   const { eachToplevelRecord } = job;
   await pEachSeries([].concat(data), async function topLevelAnno(anno, idx) {
     if (!remainMaxErr) { return; }
-    const mongoId = getOwn(anno, '_id');
     job.topRecIdx = data.offset + idx;
+    const mongoId = getOwn(anno, '_id');
+    if (job.skipMongoIds.has(mongoId)) { return job.skipRec(); }
+
     const progress = idx / nSliced;
     if ((idx % progressInterval) === 0) {
       console.error({ idx, progress }, { mongoId });
