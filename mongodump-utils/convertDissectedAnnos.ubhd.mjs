@@ -56,6 +56,8 @@ reg([
 
 
 
+skipMongoIds.add('787d953050996');
+skipMongoIds.add('cb219db7cbb20');
 skipMongoIds.add('CRo8W4H2RpW4l4hHcofuVQ');
 skipMongoIds.add('X2ITI56MRp-viA-H9jVV2g');
 
