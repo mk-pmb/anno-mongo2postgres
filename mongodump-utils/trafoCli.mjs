@@ -1,6 +1,6 @@
 // -*- coding: utf-8, tab-width: 2 -*-
 
-import parseCliOpt from 'minimist';
+import cliEnvCfg from 'cfg-cli-env-180111-pmb/node.js';
 import pDelay from 'delay';
 import pEachSeries from 'p-each-series';
 import getOwn from 'getown';
@@ -44,7 +44,7 @@ const jobApi = {
 
 
 function trafoCli(origJobSpec) {
-  const cliOpt = parseCliOpt(process.argv.slice(2));
+  const cliOpt = cliEnvCfg().allCliOpt;
   console.error('CLI options:', cliOpt);
 
   const report = {

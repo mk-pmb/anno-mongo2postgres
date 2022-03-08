@@ -19,6 +19,7 @@
   "eslintConfig": { "extends": "nodejs-pmb" },
 
   "dependencies": {
+    "cfg-cli-env-180111-pmb": "^0.1.2",
     "count-map-pmb": "^0.1.1",
     "deepsortobj": "^0.1.3",
     "delay": "^5.0.0",
@@ -26,7 +27,6 @@
     "filter-container-entries-pmb": "^0.2.0",
     "get-stdin": "^6.0.0",
     "getown": "^1.0.0",
-    "minimist": "^1.2.5",
     "nodemjs": "^0.1.9",
     "nofs": "^0.12.2",
     "objdive": "^0.1.3",
