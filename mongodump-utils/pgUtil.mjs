@@ -2,6 +2,9 @@
 
 import equal from 'equal-pmb';
 
+const doNothing = Boolean;
+
+
 const isoTimestampRgx = new RegExp(('^'
   + '(²²-²-²)'
   + 'T'
@@ -41,11 +44,13 @@ const pgu = {
     throw new TypeError('Unsupported value type: ' + t);
   },
 
-  fmtInsert(tbl, rec) {
-    const cols = Object.keys(rec);
-    const ins = ('INSERT INTO ' + pgu.quoteId(tbl)
+  fmtInsert: function fmt(rec, ...merge) {
+    if (merge.length) { return fmt(Object.assign({}, rec, ...merge)); }
+    const cols = Object.keys(rec).filter(k => /^[a-z]/.test(k));
+    const ins = ('INSERT INTO ' + pgu.quoteId(rec.TABLE)
       + ' (' + cols.map(pgu.quoteId).join(', ') + ') VALUES ('
       + cols.map(c => pgu.quoteVal(rec[c])).join(', ') + ');');
+    (rec.PRINT || doNothing)(ins);
     return ins;
   },
 

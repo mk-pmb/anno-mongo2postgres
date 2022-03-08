@@ -20,6 +20,8 @@ const doNothing = Boolean;
 
 let annoCache = {};
 
+function sslifyUrl(url) { return url.replace(/^(http):/, '$1s'); }
+
 
 const conv = {
 
@@ -50,9 +52,9 @@ const conv = {
     await (job.hotfixes[topMongoId + '>*'] || doNothing)(anno);
     await (job.hotfixes[recId] || doNothing)(anno);
 
+    anno.subjTgt = guessSubjectTarget(anno.data).url;
     anno.meta = {
       mongo_doc_id: annoCache.topMongoId,
-      subject_target: guessSubjectTarget(anno.data).url,
       time_created: pgUtil.timestampFromIsoFmt(anno.pop('created')),
       author_local_userid: '',
     };
@@ -112,24 +114,30 @@ const conv = {
     const reviNum = auxPop('pos int', 'reviNum').toFixed(0);
     const containerAnnoId = auxPop('nonEmpty str', 'containerAnnoId');
     verify.reviUrl(anno.pop, 'id', { containerAnnoId, reviNum });
-    const reviAddr = { anno_id: containerAnnoId, revision_id: reviNum };
-
-    const rec = {
-      ...anno.meta,
-      anno_id: ctnrAnnoId + '~' + reviNum,
+    const writeRec = pgUtil.fmtInsert.bind(null, {
+      anno_id: containerAnnoId,
       revision_id: reviNum,
+      PRINT: console.log,
+    });
+
+    // anno data record
+    const adRec = {
+      TABLE: 'anno_data',
+      ...anno.meta,
+      details: {
+        ...anno.data,
+        title: String(anno.data.title || '').trim(),
+      },
     };
+    writeRec(adRec);
 
-    verify.reviUrl(anno.pop, 'id', rec.anno_id);
-
-    const title = String(anno.data.title || '').trim();
-    rec.details = {
-      ...anno.data,
-      title,
+    // subject target record
+    const stRec = {
+      TABLE: 'anno_targets',
+      rel: 'subject',
+      url: sslifyUrl(anno.subjTgt),
     };
-
-    const ins = pgUtil.fmtInsert('anno', rec);
-    console.log(ins);
+    writeRec(stRec);
   },
 
 
