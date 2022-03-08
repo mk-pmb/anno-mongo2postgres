@@ -85,7 +85,7 @@ trafoCli.core = async function trafoCliCore(coreArgs) {
 
   const data = await readRelaxedJsonFromStdin(cliOpt);
   const nSliced = data.length;
-  const maxErr = Math.max((+cliOpt.maxerr || 0), 0) || 5;
+  const maxErr = Math.max((+cliOpt.maxerr || 0), 0) || 1;
   const progressInterval = (+cliOpt.prgi || 1e3);
   let remainMaxErr = maxErr;
   const { eachToplevelRecord } = job;
