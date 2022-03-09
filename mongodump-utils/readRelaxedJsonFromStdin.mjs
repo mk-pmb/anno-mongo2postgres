@@ -16,6 +16,7 @@ const rr = async function readRelaxedJsonFromStdin(opt) {
 
   console.error('Parsing…');
   data = JSON.parse(data);
+  if (Array.isArray(data) && (data.slice(-1)[0] === null)) { data.pop(); }
   console.error('Number of top-level records in input:', data.length);
 
   const tlrOffset = (+opt.offset || 0);

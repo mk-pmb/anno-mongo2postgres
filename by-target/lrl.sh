@@ -6,6 +6,7 @@ function misc () {
   case "$TASK" in
     dis ) ./clear_cache.sh && lrl9e9 dissect <../dumps/latest.jsonld "$@";;
     pg ) lrl_cda <tmp.dissect.all.json "$@";;
+    pg1k ) lrl_cda <tmp.dissect.all.json limit=1e3 "$@";;
     re ) lrl_cda <tmp.undissect.json prgi=1 "$@";;
     * ) echo "E: unknown task" >&2; return 3;;
   esac || return $?

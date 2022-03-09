@@ -17,6 +17,7 @@ import rateAnnoDepthComplexity from './rateAnnoDepthComplexity.mjs';
 
 const doNothing = Boolean;
 const combinedOutput = nodeFs.createWriteStream('tmp.dissect.all.json');
+combinedOutput.write('[\n');
 
 function len(x) { return (+(x || false).length || 0); }
 
@@ -29,11 +30,11 @@ function stringifyDivePath(dp) {
 const save = {
 
   async json(destBase, data) {
-    const text = safeSortedJsonify(data) + '\n';
+    const text = safeSortedJsonify(data);
     const destFull = destBase + '.json';
     // console.warn('saveJson', destFull);
-    combinedOutput.write(text);
-    await promiseFs.writeFile(destFull, text);
+    combinedOutput.write(text + ',\n');
+    await promiseFs.writeFile(destFull, text + '\n');
   },
 
   async splitHistory(how, anno) {
@@ -119,6 +120,12 @@ const jobSpec = {
       destBase: saveDir + '/' + saveAsBaseName,
       divePath: { types: '', indices: [] },
     }, anno);
+  },
+
+  async cliDone() {
+    console.debug('Closing combined log.');
+    combinedOutput.write('null]\n');
+    combinedOutput.close();
   },
 
 };

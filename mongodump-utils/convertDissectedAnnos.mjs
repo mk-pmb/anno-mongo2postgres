@@ -133,7 +133,7 @@ const conv = {
 
     // subject target record
     const stRec = {
-      TABLE: 'anno_targets',
+      TABLE: 'anno_links',
       rel: 'subject',
       url: sslifyUrl(anno.subjTgt),
     };
@@ -195,7 +195,7 @@ const conv = {
       // Fortunately, for discarding the reviAnno, we can settle with a
       // lesser assumption:
       vTry(verify.expectHasAllTheContentsFrom,
-        'Expect: ' + shallowTrace + ' has all data from deep revi'
+        'Expect: ' + shallowTrace + ' has all data from deep revi',
       )(shallowRevi.data, reviAnno.data, job);
 
       return;

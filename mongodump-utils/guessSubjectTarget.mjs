@@ -10,7 +10,7 @@ const gpt = function guessSubjectTarget(anno) {
     const n = tgt.length;
     if (n < 1) { throw new Error('Found no target'); }
     if (n > 1) { throw new Error('Found too many targets'); }
-    tgt = tgt[0];
+    [tgt] = tgt;
   }
   tgt = (tgt.scope
     || tgt.id

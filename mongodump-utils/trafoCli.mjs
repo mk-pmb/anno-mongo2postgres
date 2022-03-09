@@ -89,10 +89,11 @@ trafoCli.core = async function trafoCliCore(coreArgs) {
   const progressInterval = (+cliOpt.prgi || 1e3);
   let remainMaxErr = maxErr;
   const { eachToplevelRecord } = job;
-  await pEachSeries([].concat(data), async function topLevelAnno(anno, idx) {
+  await pEachSeries([].concat(data), async function topLevelRecord(rec, idx) {
     if (!remainMaxErr) { return; }
     job.topRecIdx = data.offset + idx;
-    const mongoId = getOwn(anno, '_id');
+    const mongoId = getOwn(rec, '_id');
+    if (!mongoId) { console.error('W: no _id in record!', { idx, rec }); }
     if (job.skipMongoIds.has(mongoId)) { return job.skipRec(); }
 
     const progress = idx / nSliced;
@@ -101,7 +102,7 @@ trafoCli.core = async function trafoCliCore(coreArgs) {
     }
     const trace = '@' + idx + ':' + mongoId;
     try {
-      await vTry.pr(eachToplevelRecord, [trace])(anno, mongoId, job);
+      await vTry.pr(eachToplevelRecord, [trace])(rec, mongoId, job);
       report.counters.add('success');
     } catch (err) {
       job.errorsIds.push(mongoId);
@@ -115,6 +116,8 @@ trafoCli.core = async function trafoCliCore(coreArgs) {
 
   const timeFinished = Date.now();
   const durationMsec = timeFinished - timeStarted;
+
+  await (job.cliDone || doNothing)(job);
 
   const dupes = job.hopefullyUnique.rangeFilter(2).toDict({ empty: false });
   const unconfirmedAssumptions = verify.filterUnconfirmed(job.assumptions);
@@ -136,6 +139,8 @@ trafoCli.core = async function trafoCliCore(coreArgs) {
     durationMinutes: durationMsec / 60e3,
     ...report,
   });
+
+  await (job.cliCleanup || doNothing)(job);
 };
 
 
