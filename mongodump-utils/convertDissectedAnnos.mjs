@@ -49,8 +49,8 @@ const conv = {
       job.hint('latestTopAnnoRecIdx', job.topRecIdx);
     }
 
-    await (job.hotfixes[topMongoId + '>*'] || doNothing)(anno);
-    await (job.hotfixes[recId] || doNothing)(anno);
+    await (job.hotfixes[topMongoId + '>*'] || doNothing)(anno, job);
+    await (job.hotfixes[recId] || doNothing)(anno, job);
 
     anno.subjTgt = guessSubjectTarget(anno.data).url;
     anno.meta = {
