@@ -5,7 +5,6 @@ import getOwn from 'getown';
 import equal from 'equal-pmb';
 import mustBe from 'typechecks-pmb/must-be.js';
 import vTry from 'vtry';
-import makeFilter from 'filter-container-entries-pmb';
 
 const namedEqual = equal.named.deepStrictEqual;
 
@@ -14,13 +13,6 @@ const namedEqual = equal.named.deepStrictEqual;
 const veri = {
 
   annoBaseUrl: 'https://anno.ub.uni-heidelberg.de/anno/',
-
-  filterUnconfirmed: makeFilter({
-    dive: 'confirmed',
-    negate: true,
-    empty: false,
-    outFmt: 'dict',
-  }),
 
   reviUrl(pop, key, info) {
     const {

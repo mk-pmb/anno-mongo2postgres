@@ -4,16 +4,23 @@ import cliEnvCfg from 'cfg-cli-env-180111-pmb/node.js';
 import CountMapPmb from 'count-map-pmb';
 import deepSortObj from 'deepsortobj';
 import getOwn from 'getown';
+import makeFilter from 'filter-container-entries-pmb';
 import pDelay from 'delay';
 import pEachSeries from 'p-each-series';
 import vTry from 'vtry';
 
 
 import readRelaxedJsonFromStdin from './readRelaxedJsonFromStdin.mjs';
-import verify from './libVerify.mjs';
+
 
 const doNothing = Boolean;
 
+const filterUnconfirmed = makeFilter({
+  dive: 'confirmed',
+  negate: true,
+  empty: false,
+  outFmt: 'dict',
+});
 
 const jobApi = {
 
@@ -120,7 +127,7 @@ trafoCli.core = async function trafoCliCore(coreArgs) {
   await (job.cliDone || doNothing)(job);
 
   const dupes = job.hopefullyUnique.rangeFilter(2).toDict({ empty: false });
-  const unconfirmedAssumptions = verify.filterUnconfirmed(job.assumptions);
+  const unconfirmedAssumptions = filterUnconfirmed(job.assumptions);
 
   Object.assign(report, {
     nSliced,
