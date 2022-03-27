@@ -1,7 +1,7 @@
 // -*- coding: utf-8, tab-width: 2 -*-
 
-import sharedHotfixes from './ubhd.sharedHotfixes.mjs';
-import diss from './dissect.mjs';
+import sharedHotfixes from './sharedHotfixes.mjs';
+import diss from '../dissect.mjs';
 
 
 const { job } = diss;

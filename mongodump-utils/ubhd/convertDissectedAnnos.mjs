@@ -3,10 +3,10 @@
 import eq from 'equal-pmb';
 import objDive from 'objdive';
 
-import sharedHotfixes from './ubhd.sharedHotfixes.mjs';
-import cda from './convertDissectedAnnos.mjs';
-import creatorAliases from './creatorAliases.ubhd.json';
-import badDois from './badDois.ubhd.json';
+import sharedHotfixes from './sharedHotfixes.mjs';
+import cda from '../convertDissectedAnnos/index.mjs';
+import creatorAliases from './creatorAliases.json';
+import badDois from './badDois.json';
 
 const { job } = cda;
 const {

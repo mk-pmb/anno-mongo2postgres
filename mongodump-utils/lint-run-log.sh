@@ -11,12 +11,15 @@ function lint_and_run () {
   local BFN="$1"; shift
   BFN="${BFN%.mjs}"
   local MJS="$BFN.mjs"
-  [[ "$MJS" == */* ]] || MJS="$SELFPATH/$MJS"
+  [[ "$MJS" == /* ]] || MJS="$SELFPATH/$MJS"
   [ -f "$MJS" ] || return 4$(echo "E: no such file: $MJS" >&2)
+
   cwd+exec "$SELFPATH" elp >&2 || return $?
+
+  local TMP_BFN="$SELFPATH/tmp.${BFN//\//.}"
   nodemjs "$MJS" "$@" \
-    2> >(unbuffered tee -- "$SELFPATH/tmp.$BFN.err" >&2) \
-    > >(unbuffered tee -- "$SELFPATH/tmp.$BFN.txt") \
+    2> >(unbuffered tee -- "$TMP_BFN.err" >&2) \
+    > >(unbuffered tee -- "$TMP_BFN.txt") \
     || return $?
 }
 
