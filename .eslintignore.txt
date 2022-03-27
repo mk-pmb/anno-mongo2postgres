@@ -1,0 +1,7 @@
+﻿
+/dumps/[0-9]*.jsonld
+/dumps/*.+*+*.jsonld
+/dumps/latest.jsonld
+
+/by-target/[a-z0-9]*.*/
+/by-target/tmp.*
