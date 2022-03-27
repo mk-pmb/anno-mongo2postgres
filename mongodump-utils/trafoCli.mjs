@@ -1,12 +1,12 @@
 // -*- coding: utf-8, tab-width: 2 -*-
 
 import cliEnvCfg from 'cfg-cli-env-180111-pmb/node.js';
+import CountMapPmb from 'count-map-pmb';
+import deepSortObj from 'deepsortobj';
+import getOwn from 'getown';
 import pDelay from 'delay';
 import pEachSeries from 'p-each-series';
-import getOwn from 'getown';
-import CountMapPmb from 'count-map-pmb';
 import vTry from 'vtry';
-import deepSortObj from 'deepsortobj';
 
 
 import readRelaxedJsonFromStdin from './readRelaxedJsonFromStdin.mjs';
