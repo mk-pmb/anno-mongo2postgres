@@ -4,6 +4,7 @@ import equal from 'equal-pmb';
 import mustBe from 'typechecks-pmb/must-be.js';
 
 
+import countIdFormats from './countIdFormats.mjs';
 import deepVersionRevi from './deepVersionRevi.mjs';
 
 
@@ -14,6 +15,8 @@ async function annoRevision(job, reviAnno) {
   equal(container === reviAnno, false);
 
   const mongoId = reviAnno.meta.mongo_doc_id;
+  countIdFormats(job, mongoId);
+
   const commentNums = dp.commentIndices.map(i => i + 1);
   const containerAnnoId = [mongoId, ...commentNums].join('.');
   if (container.id) { equal(container.id, containerAnnoId); }

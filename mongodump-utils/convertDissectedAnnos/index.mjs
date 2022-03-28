@@ -13,10 +13,16 @@ import optimizeReviDetails from './optimizeReviDetails.mjs';
 import parseDivePath from './parseDivePath.mjs';
 
 
+const idFormatRegExps = {
+  uuid: /^[0-9a-f]{8}(?:\-[0-9a-f]{4}){3}-[0-9a-f]{12}$/,
+};
+
+
 const conv = {
   annoCache: {},
-  hotfixes: {},
   creatorAliases: {},
+  hotfixes: {},
+  idFormatRegExps,
 
   annoContainer,
   annoRevision,

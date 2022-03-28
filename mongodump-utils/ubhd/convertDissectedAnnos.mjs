@@ -3,10 +3,11 @@
 import eq from 'equal-pmb';
 import objDive from 'objdive';
 
-import sharedHotfixes from './sharedHotfixes.mjs';
+import badDois from './badDois.json';
 import cda from '../convertDissectedAnnos/index.mjs';
 import creatorAliases from './creatorAliases.json';
-import badDois from './badDois.json';
+import idFormats from './idFormats.mjs';
+import sharedHotfixes from './sharedHotfixes.mjs';
 
 const { job } = cda;
 const {
@@ -24,6 +25,9 @@ job.eachToplevelRecord = function eachTLR(origAnno, recId, jobArg) {
 
 
 sharedHotfixes.addSkips(job);
+
+Object.assign(job.idFormatRegExps, idFormats.extraRegExps);
+
 
 const digiDoi = '10.11588/anno.diglit.';
 
