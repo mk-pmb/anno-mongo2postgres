@@ -14,6 +14,15 @@ const {
 } = job;
 
 
+
+const origEachTLR = job.eachToplevelRecord;
+job.eachToplevelRecord = function eachTLR(origAnno, recId, jobArg) {
+  // const { creator } = origAnno;
+  // if (creator !== 'wgd@DWork') { return jobArg.skipRec(); }
+  return origEachTLR(origAnno, recId, jobArg);
+};
+
+
 sharedHotfixes.addSkips(job);
 
 const digiDoi = '10.11588/anno.diglit.';
