@@ -4,7 +4,7 @@ import mustBe from 'typechecks-pmb/must-be.js';
 import vTry from 'vtry';
 
 
-import verify from './libVerify.mjs';
+import verify from '../verifyAnno/index.mjs';
 
 
 const EX = {

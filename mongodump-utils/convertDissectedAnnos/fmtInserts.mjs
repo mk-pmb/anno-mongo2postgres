@@ -3,9 +3,8 @@
 import objPop from 'objpop';
 import mustBe from 'typechecks-pmb/must-be.js';
 
-
 import pgUtil from '../pgUtil.mjs';
-import verify from './libVerify.mjs';
+import verify from '../verifyAnno/index.mjs';
 
 
 function sslifyUrl(url) { return url.replace(/^(http):/, '$1s'); }
