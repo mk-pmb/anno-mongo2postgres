@@ -9,12 +9,26 @@ function cli_main () {
   local TASK="$1"; shift
   case "$TASK" in
     clean ) clear_cache;;
-    dis ) clear_cache && lrl9e9 ubhd/dissect <../dumps/latest.jsonld "$@";;
+    dis ) re_diss "$@";;
+    dis- ) re_diss_digi +cpg389+annotationen_test "$@";;
     pg ) lrl_cda <tmp.dissect.all.json "$@";;
     pg1k ) lrl_cda <tmp.dissect.all.json limit=1e3 "$@";;
     re ) lrl_cda <tmp.undissect.json prgi=1 "$@";;
     * ) echo "E: unknown task" >&2; return 3;;
   esac || return $?
+}
+
+
+function re_diss () {
+  clear_cache || return $?
+  lrl9e9 ubhd/dissect "$@" <../dumps/latest.jsonld || return $?
+}
+
+
+function re_diss_digi () {
+  local SUBDIRS="$1"; shift
+  SUBDIRS="${SUBDIRS//+/ ubhd.digi/diglit/}"
+  re_diss --onlySaveDirs="$SUBDIRS" "$@" || return $?
 }
 
 

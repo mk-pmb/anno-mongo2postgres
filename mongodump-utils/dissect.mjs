@@ -11,9 +11,10 @@ import pEachSeries from 'p-each-series';
 import safeSortedJsonify from 'safe-sortedjson';
 
 
-import trafoCli from './trafoCli.mjs';
 import guessSubjectTarget from './guessSubjectTarget.mjs';
+import makeUrlPrefixesFilter from './urlPrefixesFilter.mjs';
 import rateAnnoDepthComplexity from './rateAnnoDepthComplexity.mjs';
+import trafoCli from './trafoCli.mjs';
 
 const doNothing = Boolean;
 const combinedOutput = nodeFs.createWriteStream('tmp.dissect.all.json');
@@ -82,12 +83,20 @@ const save = {
 };
 
 
+function splitSpace(x) { return String(x || '').split(/\s+/); }
+
 
 
 const jobSpec = {
 
   rewriteRevHost: String,
   rewriteSaveDir: String,
+  onlySaveDirs: makeUrlPrefixesFilter(),
+
+  async cliInit(job) {
+    job.onlySaveDirs.addPrefixes(splitSpace(job.cliOpt.onlySaveDirs));
+    job.onlySaveDirs.addPrefixes(splitSpace(process.env.dissect_only_savedir));
+  },
 
   async eachToplevelRecord(anno, mongoId, job) {
     mustBe.nest('Mongo ID', mongoId);
@@ -103,6 +112,7 @@ const jobSpec = {
       ...tgt.pathParts.slice(0, -1),
     ].join('/');
     saveDir = job.rewriteSaveDir(saveDir);
+    if (!job.onlySaveDirs(saveDir)) { return; }
     if (!saveDir) { return; }
 
     const complexity = rateAnnoDepthComplexity(anno);
