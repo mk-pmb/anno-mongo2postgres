@@ -47,7 +47,7 @@ function lrl9e9 () {
 
 
 function lrl_cda () {
-  lrl9e9 '>' tmp.conv.sql ubhd/convertDissectedAnnos "$@"
+  lrl9e9 ubhd/convertDissectedAnnos "$@"
 }
 
 
