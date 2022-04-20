@@ -16,12 +16,15 @@ const {
 
 
 
-const origEachTLR = job.eachToplevelRecord;
-job.eachToplevelRecord = function eachTLR(origAnno, recId, jobArg) {
-  // const { creator } = origAnno;
-  // if (creator !== 'wgd@DWork') { return jobArg.skipRec(); }
-  return origEachTLR(origAnno, recId, jobArg);
-};
+job.reHook(async function optimizeReviDetails(reviAnno, ...args) {
+  await optimizeReviDetails.orig(reviAnno, ...args);
+  const { data } = reviAnno;
+  if (data.creator === 'wgd@DWork') {
+    if (data.title && (!data.title.startsWith('Bildzyklus '))) {
+      data.title = 'Bildzyklus zum ›Welschen Gast‹, ' + data.title;
+    }
+  }
+});
 
 
 sharedHotfixes.addSkips(job);

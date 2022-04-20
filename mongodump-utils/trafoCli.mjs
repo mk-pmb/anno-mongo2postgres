@@ -46,6 +46,12 @@ const jobApi = {
 
   skipRec() { this.counters.add('skipped'); },
 
+  reHook(func) {
+    const { name } = func;
+    func.orig = this[name]; // eslint-disable-line no-param-reassign
+    this[name] = func;
+  },
+
 };
 
 

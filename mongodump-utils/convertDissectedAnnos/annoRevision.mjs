@@ -3,7 +3,6 @@
 import equal from 'equal-pmb';
 import mustBe from 'typechecks-pmb/must-be.js';
 
-
 import countIdFormats from './countIdFormats.mjs';
 import deepVersionRevi from './deepVersionRevi.mjs';
 
@@ -29,7 +28,7 @@ async function annoRevision(job, reviAnno) {
     deepVersionRevi.confirm(job, reviAnno, containerAnnoId, reviIdx);
   }
 
-  await job.optimizeReviDetails(reviAnno);
+  await job.optimizeReviDetails(reviAnno, job);
   return job.fmtInserts(reviAnno, { containerAnnoId, reviNum });
 }
 
