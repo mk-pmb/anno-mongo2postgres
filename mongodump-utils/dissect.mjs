@@ -31,7 +31,8 @@ function stringifyDivePath(dp) {
 const save = {
 
   async json(destBase, data) {
-    const text = safeSortedJsonify(data);
+    let text = safeSortedJsonify(data);
+    text = text.replace(/(\n {2})("\w+":)( ["\d])/g, '$1$2$1 $3');
     const destFull = destBase + '.json';
     // console.warn('saveJson', destFull);
     combinedOutput.write(text + ',\n');
