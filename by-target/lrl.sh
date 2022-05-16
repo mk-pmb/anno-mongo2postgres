@@ -48,6 +48,7 @@ function lrl9e9 () {
 
 function lrl_cda () {
   lrl9e9 ubhd/convertDissectedAnnos "$@" || return $?
+  rm -- tmp.pg.anno_*.sql.gz
   gzip tmp.pg.anno_*.sql || return $?
 }
 

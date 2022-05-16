@@ -2,6 +2,7 @@
 
 import eq from 'equal-pmb';
 import objDive from 'objdive';
+import objMapValues from 'lodash.mapvalues';
 
 import badDois from './badDois.json';
 import cda from '../convertDissectedAnnos/index.mjs';
@@ -15,6 +16,19 @@ const {
 } = job;
 
 
+const standardTopLevelKeys = [
+  '@context',
+  'body',
+  'canonical',
+  'created',
+  'creator',
+  'modified',
+  'rights',
+  'target',
+  'title',
+  'type',
+];
+
 
 job.reHook(async function optimizeReviDetails(reviAnno, ...args) {
   await optimizeReviDetails.orig(reviAnno, ...args);
@@ -24,6 +38,14 @@ job.reHook(async function optimizeReviDetails(reviAnno, ...args) {
       data.title = 'Bildzyklus zum ›Welschen Gast‹, ' + data.title;
     }
   }
+
+  objMapValues(data, function checkTopLevelKey(v, k) {
+    if (standardTopLevelKeys.includes(k)) { return; }
+    delete data[k];
+    if (k === '_lastCommented') { return; }
+    if (k === 'collection') { return; }
+    job.counters.add('nonStandardTopLevelKey:' + k);
+  });
 });
 
 
