@@ -22,7 +22,7 @@ Object.assign(job, {
   rewriteSaveDir(origSaveDir) {
     const wts /* with trailing slash */ = origSaveDir + '/';
     if (wts.startsWith('ubhd.sempub/provitest/')) { return; }
-    if (wts.startsWith('ubhd.digi/diglit/annotationen_test/')) { return; }
+    // if (wts.startsWith('ubhd.digi/diglit/annotationen_test/')) { return; }
     return origSaveDir;
   },
 
