@@ -28,8 +28,9 @@ async function annoRevision(job, reviAnno) {
     deepVersionRevi.confirm(job, reviAnno, containerAnnoId, reviIdx);
   }
 
-  await job.optimizeReviDetails(reviAnno, job);
-  return job.fmtInserts(reviAnno, { containerAnnoId, reviNum });
+  const optimizedReviAnno = reviAnno.api.clone();
+  await job.optimizeReviDetails(optimizedReviAnno, job);
+  return job.fmtInserts(optimizedReviAnno, { containerAnnoId, reviNum });
 }
 
 
