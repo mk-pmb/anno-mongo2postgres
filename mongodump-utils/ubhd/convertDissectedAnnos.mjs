@@ -2,14 +2,15 @@
 
 import eq from 'equal-pmb';
 import objDive from 'objdive';
-import objMapValues from 'lodash.mapvalues';
 
 import badDois from './badDois.json';
 import cda from '../convertDissectedAnnos/index.mjs';
 import creatorAliases from './creatorAliases.json';
 import idFormats from './idFormats.mjs';
+import optimizeReviDetails from './optimizeReviDetails.mjs';
 import sharedHotfixes from './sharedHotfixes.mjs';
 import ubFacts from './facts.mjs';
+
 
 const { job } = cda;
 const {
@@ -17,41 +18,8 @@ const {
 } = job;
 
 
-const standardTopLevelKeys = [
-  '@context',
-  'body',
-  'canonical',
-  'created',
-  'creator',
-  'modified',
-  'rights',
-  'target',
-  'title',
-  'type',
-];
-
-
-job.reHook(async function optimizeReviDetails(reviAnno, ...args) {
-  await optimizeReviDetails.orig(reviAnno, ...args);
-  const { data } = reviAnno;
-  if (data.creator === 'wgd@DWork') {
-    if (data.title && (!data.title.startsWith('Bildzyklus '))) {
-      data.title = 'Bildzyklus zum ›Welschen Gast‹, ' + data.title;
-    }
-  }
-
-  objMapValues(data, function checkTopLevelKey(v, k) {
-    if (standardTopLevelKeys.includes(k)) { return; }
-    delete data[k];
-    if (k === '_lastCommented') { return; }
-    if (k === 'collection') { return; }
-    job.counters.add('nonStandardTopLevelKey:' + k);
-  });
-});
-
-
+job.reHook(optimizeReviDetails);
 sharedHotfixes.addSkips(job);
-
 Object.assign(job.idFormatRegExps, idFormats.extraRegExps);
 
 
