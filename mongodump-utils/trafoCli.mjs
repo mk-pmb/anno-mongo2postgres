@@ -22,12 +22,17 @@ const filterUnconfirmed = makeFilter({
   outFmt: 'dict',
 });
 
+
 const jobApi = {
 
-  assume(key, ...init) {
+  assume(key, ...upd) {
     const known = this.assumptions;
-    const a = { ...known.get(key), ...init };
-    known.set(key, a);
+    const old = known.get(key);
+    const a = old || {};
+    Object.assign(a, ...upd);
+    // ^- Update inplace to allow caching the assumption object
+    //    reference in a local variable.
+    if (!old) { known.set(key, a); }
     return a;
   },
 
