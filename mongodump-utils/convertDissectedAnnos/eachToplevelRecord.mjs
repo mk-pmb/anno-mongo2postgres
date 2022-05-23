@@ -31,6 +31,7 @@ function reorganizeCommonNonStandardTopLevelProps(recId, origData) {
   equal(popData('_replies'), undefined);
   equal(popData('type'), ['Annotation']);
   anno.disMeta = popData('@dissect.meta');
+  anno.relations = {};
   anno.meta = {
     time_created: pgUtil.timestampFromIsoFmt(popData('created')),
     author_local_userid: '',
@@ -61,8 +62,13 @@ const eachTLR = async function eachToplevelRecord(dissected, recId, job) {
   await (job.hotfixes[topMongoId + '>*'] || doNothing)(anno, job);
   await (job.hotfixes[recId] || doNothing)(anno, job);
 
-  anno.subjTgt = guessSubjectTarget(anno.data).url;
-  equal(anno.meta.subject_target, annoCache.topAnno.meta.subject_target);
+  (function determineSubjectTarget() {
+    // Determine only after hotfixes have been applied.
+    const subjTgt = guessSubjectTarget(anno.data);
+    const sslUrl = subjTgt.url.replace(/^(http):/, '$1s');
+    anno.relations.subject = sslUrl;
+    equal(sslUrl, annoCache.topAnno.relations.subject);
+  }());
 
   const dpParsed = job.parseDivePath(divePath, topMongoId);
   if (!dpParsed) { throw new Error('Unsupported divePath: ' + divePath); }

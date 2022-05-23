@@ -3,13 +3,11 @@
 import nodeFs from 'fs';
 
 import mustBe from 'typechecks-pmb/must-be.js';
+import objMapValues from 'lodash.mapvalues';
 import objPop from 'objpop';
 
 import pgUtil from '../pgUtil.mjs';
 import verify from '../verifyAnno/index.mjs';
-
-
-function sslifyUrl(url) { return url.replace(/^(http):/, '$1s'); }
 
 
 const sqlFiles = new Map();
@@ -41,13 +39,10 @@ function fmtInserts(anno, auxMeta) {
   };
   writeRec(adRec);
 
-  // subject target record
-  const stRec = {
-    TABLE: 'anno_links',
-    rel: 'subject',
-    url: sslifyUrl(anno.subjTgt),
-  };
-  writeRec(stRec);
+  objMapValues(anno.relations, function declareLink(url, rel) {
+    const linkRec = { TABLE: 'anno_links', rel, url };
+    writeRec(linkRec);
+  });
 }
 
 

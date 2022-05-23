@@ -34,7 +34,7 @@ CREATE TABLE "public"."anno_links" (
     "revision_id" character varying NOT NULL,
     "rel" character varying NOT NULL,
     "url" character varying NOT NULL,
-    CONSTRAINT "anno_targets_anno_id_revision_id" UNIQUE ("anno_id", "revision_id"),
+    CONSTRAINT "anno_links_anno_id_revision_id_rel" UNIQUE ("anno_id", "revision_id", "rel"),
     CONSTRAINT "anno_targets_pkey" PRIMARY KEY ("pg_row_id")
 ) WITH (oids = false);
 

@@ -4,7 +4,7 @@ import mustBe from 'typechecks-pmb/must-be';
 
 const safeUrlRgx = /^https?:\/{2}([a-z0-9_:\.\/\-]+)$/;
 
-const gpt = function guessSubjectTarget(anno) {
+const EX = function guessSubjectTarget(anno) {
   let tgt = anno.target;
   if (Array.isArray(tgt)) {
     const n = tgt.length;
@@ -44,4 +44,4 @@ const gpt = function guessSubjectTarget(anno) {
 
 
 
-export default gpt;
+export default EX;
