@@ -13,7 +13,7 @@ async function annoRevision(job, reviAnno) {
   mustBe('obj', 'container (dp: "' + dp.container + '")')(container);
   equal(container === reviAnno, false);
 
-  const mongoId = reviAnno.meta.mongo_doc_id;
+  const mongoId = mustBe.nest('mongoId', reviAnno.meta.mongo_doc_id);
   countIdFormats(job, mongoId);
 
   const commentNums = dp.commentIndices.map(i => i + 1);

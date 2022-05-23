@@ -54,6 +54,7 @@ const EX = {
       expectedData: container.data,
       containerAnnoId,
       job,
+      reviRecId: reviAnno.recId,
       reviDivePath: dp,
     }, reviAnno.data, reviIdx);
     assu.confirmed = true;

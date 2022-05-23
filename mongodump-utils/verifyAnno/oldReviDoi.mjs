@@ -3,8 +3,8 @@
 import mustBe from 'typechecks-pmb/must-be.js';
 
 
-const EX = function oldReviDoi(exDoi, reviDoi, reviNum, how) {
-  if (!exDoi) {
+const EX = function oldReviDoi(containerDoi, reviDoi, reviNum, how) {
+  if (!containerDoi) {
     mustBe('undef', 'DOI-less annotation > revision > doi')(reviDoi);
     return;
   }
@@ -13,9 +13,16 @@ const EX = function oldReviDoi(exDoi, reviDoi, reviNum, how) {
   try {
     mustBe([['oneOf', [
       undefined,
-      (exDoi + '~' + reviNum),
-      (exDoi + '_' + reviNum),
+      (containerDoi + '~' + reviNum),
+      (containerDoi + '_' + reviNum),
     ]]], 'DOI-bearing annotation > revision > doi')(reviDoi);
+    if (reviDoi === undefined) { return; }
+
+    const reviRecId = mustBe.nest('reviRecId', how.reviRecId);
+    const assuKey = 'legacyDoi:verified:' + reviRecId;
+    const assuUpd = { confirmed: true, reviDoi, containerDoi };
+    // console.debug('legacyDoi:verified!', reviRecId, assuUpd);
+    how.job.assume(assuKey, assuUpd);
     return;
   } catch (caught) {
     doiErr = caught;
@@ -30,6 +37,7 @@ const EX = function oldReviDoi(exDoi, reviDoi, reviNum, how) {
 Object.assign(EX, {
 
   reportBadDoi(how, reviDoi) {
+    mustBe.nest('reviDoi', reviDoi);
     const rpr = how.job.badDoiReportPrefix;
     if (!rpr) { return false; }
     if (!reviDoi.startsWith(rpr)) { return false; }
