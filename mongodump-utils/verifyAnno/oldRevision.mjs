@@ -22,6 +22,7 @@ const EX = function verifyOldRevision(how, origRevi, reviIdx) {
 
     verifyReviUrl(revi, 'id', { reviNum });
     verifyReviUrl(revi, 'versionOf');
+    verifyReviUrl(revi, 'via');
     verifyOldReviDoi(expectedData.doi, popRevi('doi'), reviNum, how);
 
     const allSubRevis = popRevi.mustBe('undef | ary', '_revisions');

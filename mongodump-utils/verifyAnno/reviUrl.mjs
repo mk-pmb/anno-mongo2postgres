@@ -1,5 +1,10 @@
 // -*- coding: utf-8, tab-width: 2 -*-
 
+import ubFacts from '../ubhd/facts.mjs';
+
+const { annoBaseUrl } = ubFacts;
+
+
 const EX = function reviUrl(anno, key, info) {
   const {
     reviNum,
@@ -16,7 +21,7 @@ const EX = function reviUrl(anno, key, info) {
 
 Object.assign(EX, {
 
-  annoBaseUrl: 'https://anno.ub.uni-heidelberg.de/anno/',
+  annoBaseUrl,
 
 });
 

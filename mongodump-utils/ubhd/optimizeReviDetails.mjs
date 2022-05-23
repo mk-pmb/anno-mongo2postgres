@@ -4,7 +4,10 @@ import equal from 'equal-pmb';
 // import mustBe from 'typechecks-pmb/must-be.js';
 import objMapValues from 'lodash.mapvalues';
 
+import ubFacts from './facts.mjs';
+
 const namedEqual = equal.named.deepStrictEqual;
+const { annoBaseUrl } = ubFacts;
 
 
 const EX = async function optimizeReviDetails(reviAnno, job) {
@@ -17,13 +20,16 @@ const EX = async function optimizeReviDetails(reviAnno, job) {
     }
   }
 
+  // const origData = { ...data };
+  function omitKey(k) { delete data[k]; }
+  EX.computableTopLevelKeys.forEach(omitKey);
+
   namedEqual('Expected no previous dc:*', data['dc:identifier'], undefined);
 
   objMapValues(data, function checkTopLevelKey(v, k) {
     if (EX.standardTopLevelKeys.includes(k)) { return; }
     delete data[k];
-    if (k === '_lastCommented') { return; }
-    if (k === 'collection') { return; }
+
     if (k === 'doi') {
       const okAssu = job.assume('legacyDoi:verified:' + recId);
       okAssu.ubhdOptim = v;
@@ -38,9 +44,30 @@ const EX = async function optimizeReviDetails(reviAnno, job) {
       job.counters.add('legacyDoi:omitUnverified');
       return;
     }
+
+    if ((k === 'via') || (k === 'versionOf')) {
+      const caid = reviAnno.divePath.expectedContainerAnnoId;
+      namedEqual('attribute ' + k, v, (annoBaseUrl + 'anno/' + caid));
+      return;
+    }
+
+    if (k === 'replyTo') {
+      const caid = reviAnno.divePath.expectedContainerAnnoId;
+      const rel = caid.replace(/\.\d+$/, '');
+      namedEqual('attribute ' + k, v, (annoBaseUrl + 'anno/' + rel));
+      return;
+    }
+
+    console.warn('nonStandardTopLevelKey:', k, v);
     job.counters.add('nonStandardTopLevelKey:' + k + '=' + v);
   });
 };
+
+EX.computableTopLevelKeys = [
+  '_lastCommented',
+  'collection',
+  'id',
+];
 
 
 EX.standardTopLevelKeys = [
@@ -51,6 +78,7 @@ EX.standardTopLevelKeys = [
   'creator',
   'dc:identifier',
   'modified',
+  'motivation',
   'rights',
   'target',
   'title',
