@@ -9,6 +9,7 @@ import cda from '../convertDissectedAnnos/index.mjs';
 import creatorAliases from './creatorAliases.json';
 import idFormats from './idFormats.mjs';
 import sharedHotfixes from './sharedHotfixes.mjs';
+import ubFacts from './facts.mjs';
 
 const { job } = cda;
 const {
@@ -54,11 +55,9 @@ sharedHotfixes.addSkips(job);
 Object.assign(job.idFormatRegExps, idFormats.extraRegExps);
 
 
-const digiDoi = '10.11588/anno.diglit.';
-
 Object.assign(job, {
   creatorAliases,
-  badDoiReportPrefix: digiDoi,
+  badDoiReportPrefix: ubFacts.digiDoi,
 });
 
 function reg(recIds, fix) {
@@ -108,7 +107,7 @@ function badDoi(mongoId, recIdSuffix, doiPrefix, badSuffix) {
 
 badDois.filter(Boolean).forEach((item) => {
   const [mongoId, reviIdx, wrongSuffix] = item;
-  badDoi(mongoId, '>dp-v-' + reviIdx, digiDoi, wrongSuffix);
+  badDoi(mongoId, '>dp-v-' + reviIdx, ubFacts.digiDoi, wrongSuffix);
 });
 
 
