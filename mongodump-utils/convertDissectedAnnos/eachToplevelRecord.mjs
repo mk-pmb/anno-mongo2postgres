@@ -22,8 +22,8 @@ function cloneAnno(orig) {
 }
 
 
-function reorganizeCommonNonStandardTopLevelProps(recId, origAnno) {
-  const anno = cloneAnno({ recId, data: origAnno });
+function reorganizeCommonNonStandardTopLevelProps(recId, origData) {
+  const anno = cloneAnno({ recId, data: origData });
   const { popData } = anno.api;
 
   popData('_id');
@@ -40,11 +40,11 @@ function reorganizeCommonNonStandardTopLevelProps(recId, origAnno) {
 }
 
 
-const eachTLR = async function eachToplevelRecord(origAnno, recId, job) {
+const eachTLR = async function eachToplevelRecord(dissected, recId, job) {
   const [topMongoId, divePath] = (recId + '>').split(/>/);
   if (job.skipMongoIds.has(topMongoId)) { return job.skipRec(); }
 
-  const anno = reorganizeCommonNonStandardTopLevelProps(recId, origAnno);
+  const anno = reorganizeCommonNonStandardTopLevelProps(recId, dissected);
 
   let { annoCache } = job;
   if (topMongoId === annoCache.topMongoId) {
