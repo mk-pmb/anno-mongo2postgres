@@ -27,10 +27,9 @@ sqlFiles.write = function writeSql(common, rec) {
 function fmtInserts(anno, auxMeta) {
   const auxPop = objPop(auxMeta, { mustBe }).mustBe;
   const reviNum = auxPop('pos int', 'reviNum').toFixed(0);
-  const containerAnnoId = auxPop('nonEmpty str', 'containerAnnoId');
-  verify.reviUrl(anno.api.popData, 'id', { containerAnnoId, reviNum });
+  verify.reviUrl(anno, 'id', { reviNum });
   const writeRec = sqlFiles.write.bind(null, {
-    anno_id: containerAnnoId,
+    anno_id: anno.divePath.expectedContainerAnnoId,
     revision_id: reviNum,
   });
 

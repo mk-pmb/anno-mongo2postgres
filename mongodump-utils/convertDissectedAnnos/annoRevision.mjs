@@ -15,22 +15,19 @@ async function annoRevision(job, reviAnno) {
 
   const mongoId = mustBe.nest('mongoId', reviAnno.meta.mongo_doc_id);
   countIdFormats(job, mongoId);
-
-  const commentNums = dp.commentIndices.map(i => i + 1);
-  const containerAnnoId = [mongoId, ...commentNums].join('.');
-  if (container.id) { equal(container.id, containerAnnoId); }
+  if (container.id) { equal(container.id, dp.expectedContainerAnnoId); }
 
   if (deepVersionRevi.assume(job, reviAnno)) { return; }
 
   const reviIdx = mustBe('pos0 int', 'revision index')(dp.versionIndices[0]);
   const reviNum = reviIdx + 1;
   if (reviNum === container.disMeta.nv) {
-    deepVersionRevi.confirm(job, reviAnno, containerAnnoId, reviIdx);
+    deepVersionRevi.confirm(job, reviAnno, reviIdx);
   }
 
   const optimizedReviAnno = reviAnno.api.clone();
   await job.optimizeReviDetails(optimizedReviAnno, job);
-  return job.fmtInserts(optimizedReviAnno, { containerAnnoId, reviNum });
+  return job.fmtInserts(optimizedReviAnno, { reviNum });
 }
 
 

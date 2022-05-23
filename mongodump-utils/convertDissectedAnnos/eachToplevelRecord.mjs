@@ -64,7 +64,7 @@ const eachTLR = async function eachToplevelRecord(origAnno, recId, job) {
   anno.subjTgt = guessSubjectTarget(anno.data).url;
   equal(anno.meta.subject_target, annoCache.topAnno.meta.subject_target);
 
-  const dpParsed = job.parseDivePath(divePath);
+  const dpParsed = job.parseDivePath(divePath, topMongoId);
   if (!dpParsed) { throw new Error('Unsupported divePath: ' + divePath); }
   anno.divePath = dpParsed;
 

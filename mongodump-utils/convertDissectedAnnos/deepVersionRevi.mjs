@@ -44,7 +44,7 @@ const EX = {
   },
 
 
-  confirm(job, reviAnno, containerAnnoId, reviIdx) {
+  confirm(job, reviAnno, reviIdx) {
     // This revision is the latest one. All of its content should
     // be equal to the container's data.
     const dp = reviAnno.divePath;
@@ -52,11 +52,10 @@ const EX = {
     const assu = job.assume('sameDataAsLatestRevision:' + container.recId);
     vTry(verify.oldRevision, 'Latest revision (+) =/= container (-)')({
       expectedData: container.data,
-      containerAnnoId,
       job,
       reviRecId: reviAnno.recId,
       reviDivePath: dp,
-    }, reviAnno.data, reviIdx);
+    }, reviAnno, reviIdx);
     assu.confirmed = true;
   },
 

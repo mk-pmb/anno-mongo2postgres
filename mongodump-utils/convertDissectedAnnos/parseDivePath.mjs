@@ -3,13 +3,14 @@
 import equal from 'equal-pmb';
 
 
-function parseDivePath(dpStr) {
+function parseDivePath(dpStr, topMongoId) {
   if (!dpStr) {
     return {
       str: '',
       commentDepth: 0,
       commentIndices: [],
       container: '',
+      expectedContainerAnnoId: null,
       versionDepth: 0,
       versionIndices: [],
     };
@@ -26,6 +27,7 @@ function parseDivePath(dpStr) {
   const commentDepth = cs.length;
   const commentIndices = args.slice(0, commentDepth).map(Number);
   equal(commentDepth, commentIndices.length);
+  const commentNums = commentIndices.map(i => i + 1);
 
   const container = (cs && ['dp', cs, ...commentIndices].join('-'));
   // console.error({ dp: dpStr, ci: commentIndices, ctr: container });
@@ -36,6 +38,7 @@ function parseDivePath(dpStr) {
     commentDepth,
     commentIndices,
     container,
+    expectedContainerAnnoId: [topMongoId, ...commentNums].join('.'),
     versionIndices: args.slice(commentDepth).map(Number),
     versionDepth: vs.length,
   };

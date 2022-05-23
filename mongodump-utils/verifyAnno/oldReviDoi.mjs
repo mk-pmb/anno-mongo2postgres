@@ -41,7 +41,7 @@ Object.assign(EX, {
     const rpr = how.job.badDoiReportPrefix;
     if (!rpr) { return false; }
     if (!reviDoi.startsWith(rpr)) { return false; }
-    const caid = how.containerAnnoId;
+    const caid = how.reviDivePath.expectedContainerAnnoId;
     const reviSuf = reviDoi.slice(rpr.length + caid.length);
     const reviDp = how.reviDivePath.str;
     // console.warn({ containerAnnoId, exSuf, reviSuf, reviDp });
