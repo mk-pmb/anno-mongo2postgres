@@ -36,6 +36,7 @@ const EX = async function optimizeReviDetails(reviAnno, job) {
     if (k === 'doi') {
       const okAssu = job.assume('legacyDoi:verified:' + recId);
       okAssu.ubhdOptim = v;
+      okAssu.subjTgt = reviAnno.relations.subject;
       const okDoi = okAssu.reviDoi;
       if (v === okDoi) {
         data['dc:identifier'] = 'urn:doi:' + v;
