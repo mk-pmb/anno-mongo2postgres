@@ -69,6 +69,7 @@ EX.computableTopLevelKeys = [
 
 EX.standardTopLevelKeys = [
   '@context',
+  'as:inReplyTo',
   'body',
   'canonical',
   'created',
