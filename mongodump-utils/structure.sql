@@ -10,7 +10,7 @@ CREATE TABLE "public"."anno_data" (
     "mongo_doc_id" character varying,
     "doi" character varying,
     "anno_id" character varying NOT NULL,
-    "revision_id" character varying NOT NULL,
+    "revision_id" smallint NOT NULL,
     "time_created" timestamptz NOT NULL,
     "author_local_userid" character varying NOT NULL,
     "details" json NOT NULL,
