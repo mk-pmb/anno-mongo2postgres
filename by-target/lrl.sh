@@ -48,8 +48,30 @@ function lrl9e9 () {
 
 function lrl_cda () {
   lrl9e9 ubhd/convertDissectedAnnos "$@" || return $?
+  concat_sql_files tmp.pg.anno_combo.sql \
+    ../mongodump-utils/structure.sql \
+    tmp.pg.anno_*.sql || return $?
   rm -- tmp.pg.anno_*.sql.gz
   gzip tmp.pg.anno_*.sql || return $?
+}
+
+
+function concat_sql_files () {
+  local DEST="$1"; shift
+  local SRC= CHAP=
+  for SRC in "$@"; do
+    [ "$SRC" == "$DEST" ] && continue
+    CHAP="-- >> >> $SRC >> >> >> >> >>"
+    echo "$CHAP"
+    cat -- "$SRC"
+    echo "${CHAP//>/<}"
+    echo
+    echo
+  done >"$DEST" || return $?
+  printf '%s\n' \
+    '-- pgAdminer needs a statement (i.e. not comment) at end of file:' \
+    'SELECT 1 AS "success";' \
+    >>"$DEST" || return $?
 }
 
 
