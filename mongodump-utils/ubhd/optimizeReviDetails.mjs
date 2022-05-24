@@ -4,6 +4,7 @@ import equal from 'equal-pmb';
 // import mustBe from 'typechecks-pmb/must-be.js';
 import objMapValues from 'lodash.mapvalues';
 
+import rewriteReplyTo from './rewriteReplyTo.mjs';
 import ubFacts from './facts.mjs';
 
 const namedEqual = equal.named.deepStrictEqual;
@@ -12,6 +13,8 @@ const { annoBaseUrl } = ubFacts;
 
 const EX = async function optimizeReviDetails(reviAnno, job) {
   await optimizeReviDetails.orig(reviAnno, job);
+  rewriteReplyTo(reviAnno, job);
+
   const { recId, data } = reviAnno;
 
   if (data.creator === 'wgd@DWork') {
@@ -51,17 +54,11 @@ const EX = async function optimizeReviDetails(reviAnno, job) {
       return;
     }
 
-    if (k === 'replyTo') {
-      const caid = reviAnno.divePath.expectedContainerAnnoId;
-      const rel = caid.replace(/\.\d+$/, '');
-      namedEqual('attribute ' + k, v, (annoBaseUrl + 'anno/' + rel));
-      return;
-    }
-
     console.warn('nonStandardTopLevelKey:', k, v);
     job.counters.add('nonStandardTopLevelKey:' + k + '=' + v);
   });
 };
+
 
 EX.computableTopLevelKeys = [
   '_lastCommented',
