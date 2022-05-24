@@ -64,10 +64,9 @@ const eachTLR = async function eachToplevelRecord(dissected, recId, job) {
 
   (function determineSubjectTarget() {
     // Determine only after hotfixes have been applied.
-    const subjTgt = guessSubjectTarget(anno.data);
-    const sslUrl = subjTgt.url.replace(/^(http):/, '$1s');
-    anno.relations.subject = sslUrl;
-    equal(sslUrl, annoCache.topAnno.relations.subject);
+    const subjTgt = job.modernizeUrl(guessSubjectTarget(anno.data).url);
+    anno.relations.subject = subjTgt;
+    equal(subjTgt, annoCache.topAnno.relations.subject);
   }());
 
   const dpParsed = job.parseDivePath(divePath, topMongoId);

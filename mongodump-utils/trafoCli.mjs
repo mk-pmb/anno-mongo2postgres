@@ -57,6 +57,10 @@ const jobApi = {
     this[name] = func;
   },
 
+  modernizeUrl(orig) {
+    return orig.replace(/^(http):/, '$1s:');
+  },
+
 };
 
 
