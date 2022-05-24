@@ -1,12 +1,12 @@
 // -*- coding: utf-8, tab-width: 2 -*-
 
-import objPop from 'objpop';
 import equal from 'equal-pmb';
 import mustBe from 'typechecks-pmb/must-be.js';
+import objPop from 'objpop';
+import pgDumpWriter from 'postgres-dump-writer-helpers-220524-pmb';
 
 import guessSubjectTarget from '../guessSubjectTarget.mjs';
 import jsonDeepCopy from '../util/jsonDeepCopy.mjs';
-import pgUtil from '../pgUtil.mjs';
 
 
 const doNothing = Boolean;
@@ -33,7 +33,7 @@ function reorganizeCommonNonStandardTopLevelProps(recId, origData) {
   anno.disMeta = popData('@dissect.meta');
   anno.relations = {};
   anno.meta = {
-    time_created: pgUtil.timestampFromIsoFmt(popData('created')),
+    time_created: pgDumpWriter.timestampFromIsoFmt(popData('created')),
     author_local_userid: '',
   };
 

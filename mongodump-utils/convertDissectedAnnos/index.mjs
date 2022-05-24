@@ -30,6 +30,10 @@ const conv = {
   fmtInserts,
   optimizeReviDetails,
   parseDivePath,
+
+  async cliCleanup(job) {
+    fmtInserts.endAll(job);
+  },
 };
 
 const trafoPr = trafoCli(conv);
