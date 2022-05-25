@@ -13,16 +13,18 @@ const { annoBaseUrl } = ubFacts;
 
 
 const EX = function rewriteReplyTo(anno, job) {
-  const { data, relations } = anno;
-  const { replyTo } = data;
-  delete data.replyTo;
-  if (!replyTo) { return; }
+  const {
+    data,
+    relations,
+  } = anno;
+  const origReplyTo = anno.api.popData('nonEmpty str | undef', 'replyTo');
+  if (!origReplyTo) { return; }
 
   const parentAnnoId = EX.findParentAnnoId(anno);
   const parentAnnoUrlRel = parentAnnoId;
   const parentAnnoUrlAbs = annoBaseUrl + 'anno/' + parentAnnoId;
 
-  namedEqual('original replyTo', replyTo, parentAnnoUrlAbs);
+  namedEqual('original replyTo', origReplyTo, parentAnnoUrlAbs);
   mustBe.prop(data, [['oneOf', [
     undefined,
     'replying',

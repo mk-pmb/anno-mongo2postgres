@@ -16,7 +16,7 @@ function cloneAnno(orig) {
   const c = jsonDeepCopy({ ...orig, api: null });
   c.api = {
     clone() { return cloneAnno(c); },
-    popData: objPop.d(c.data, { mustBe }),
+    popData: objPop.d(c.data, { mustBe }).mustBe,
   };
   return c;
 }
@@ -26,14 +26,15 @@ function reorganizeCommonNonStandardTopLevelProps(recId, origData) {
   const anno = cloneAnno({ recId, data: origData });
   const { popData } = anno.api;
 
-  popData('_id');
-  equal(popData('_revisions'), undefined);
-  equal(popData('_replies'), undefined);
-  equal(popData('type'), ['Annotation']);
-  anno.disMeta = popData('@dissect.meta');
+  popData('nonEmpty str', '_id');
+  popData('undef', '_revisions');
+  popData('undef', '_replies');
+  equal(popData('ary', 'type'), ['Annotation']);
+  anno.disMeta = popData('obj', '@dissect.meta');
   anno.relations = {};
+  const origCreatedStr = popData('nonEmpty str', 'created');
   anno.meta = {
-    time_created: pgDumpWriter.timestampFromIsoFmt(popData('created')),
+    time_created: pgDumpWriter.timestampFromIsoFmt(origCreatedStr),
     author_local_userid: '',
   };
 

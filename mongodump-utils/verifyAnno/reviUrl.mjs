@@ -11,7 +11,7 @@ const EX = function reviUrl(anno, key, info) {
   } = (info || false);
   const reviSuffix = (reviNum === undefined ? '' : '~' + reviNum);
   const suf = anno.divePath.expectedContainerAnnoId + reviSuffix;
-  anno.api.popData.mustBe([['oneOf', [
+  anno.api.popData([['oneOf', [
     undefined,
     EX.annoBaseUrl + suf,
     EX.annoBaseUrl + 'anno/' + suf,

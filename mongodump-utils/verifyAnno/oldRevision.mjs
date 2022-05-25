@@ -23,9 +23,10 @@ const EX = function verifyOldRevision(how, origRevi, reviIdx) {
     verifyReviUrl(revi, 'id', { reviNum });
     verifyReviUrl(revi, 'versionOf');
     verifyReviUrl(revi, 'via');
-    verifyOldReviDoi(expectedData.doi, popRevi('doi'), reviNum, how);
+    const reviDoi = popRevi('nonEmpty str | undef', 'doi');
+    verifyOldReviDoi(expectedData.doi, reviDoi, reviNum, how);
 
-    const allSubRevis = popRevi.mustBe('undef | ary', '_revisions');
+    const allSubRevis = popRevi('undef | ary', '_revisions');
     (allSubRevis || []).forEach(EX.bind(null, how));
 
     expectHasAllTheContentsFrom(expectedData, revi.data, job);
