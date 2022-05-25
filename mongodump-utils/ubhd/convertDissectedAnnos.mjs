@@ -32,20 +32,29 @@ function reg(recIds, fix) {
   recIds.forEach(function register(recId) { hotfixes[recId] = fix; });
 }
 
+// function multiFix(fixes) { return (x => fixes.forEach(f => f(x))); }
 
-function propSed(objPath, prop, fixes) {
+
+function propSed(objPath, props, fixes) {
+  if (!props.forEach) { return propSed(objPath, [props], fixes); }
   return function hotfixProp(anno) {
     const obj = objDive(anno.data, objPath);
+    if (!obj) {
+      console.warn('\npropSed: no object at path', objPath, '\n');
+      return;
+    }
     fixes.forEach(function applyFix(fix) {
       const rgx = fix[0] || fix;
       const tpl = fix[1] || '';
-      const old = obj[prop];
-      const upd = old.replace(rgx, tpl);
-      if (upd === old) {
-        console.warn('\npropSed: ' + prop + ': no match for', rgx, '\n');
-      } else {
-        obj[prop] = upd;
-      }
+      props.forEach(function fixOneProp(prop) {
+        const old = String(obj[prop] || '');
+        const upd = old.replace(rgx, tpl);
+        if (upd === old) {
+          console.warn('\npropSed: ' + prop + ': no match for', rgx, '\n');
+        } else {
+          obj[prop] = upd;
+        }
+      });
     });
   };
 }
