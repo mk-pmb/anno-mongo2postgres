@@ -5,18 +5,18 @@ import mustBe from 'typechecks-pmb/must-be.js';
 
 const EX = function oldReviDoi(containerDoi, reviDoi, reviNum, how) {
   if (!containerDoi) {
-    mustBe('undef', 'DOI-less annotation > revision > doi')(reviDoi);
+    mustBe('nul | undef', 'DOI-less annotation > revision > doi')(reviDoi);
     return;
   }
 
   let doiErr;
   try {
     mustBe([['oneOf', [
-      undefined,
+      null,
       (containerDoi + '~' + reviNum),
       (containerDoi + '_' + reviNum),
     ]]], 'DOI-bearing annotation > revision > doi')(reviDoi);
-    if (reviDoi === undefined) { return; }
+    if (reviDoi === null) { return; }
 
     const reviRecId = mustBe.nest('reviRecId', how.reviRecId);
     const assuKey = 'legacyDoi:verified:' + reviRecId;

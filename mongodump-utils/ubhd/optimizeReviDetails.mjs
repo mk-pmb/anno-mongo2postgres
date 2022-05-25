@@ -15,7 +15,7 @@ const EX = async function optimizeReviDetails(reviAnno, job) {
   await optimizeReviDetails.orig(reviAnno, job);
   rewriteReplyTo(reviAnno, job);
 
-  const { recId, data } = reviAnno;
+  const { data } = reviAnno;
 
   if (data.creator === 'wgd@DWork') {
     if (data.title && (!data.title.startsWith('Bildzyklus '))) {
@@ -27,27 +27,9 @@ const EX = async function optimizeReviDetails(reviAnno, job) {
   function omitKey(k) { delete data[k]; }
   EX.computableTopLevelKeys.forEach(omitKey);
 
-  namedEqual('Expected no previous dc:*', data['dc:identifier'], undefined);
-
   objMapValues(data, function checkTopLevelKey(v, k) {
     if (EX.standardTopLevelKeys.includes(k)) { return; }
     delete data[k];
-
-    if (k === 'doi') {
-      const okAssu = job.assume('legacyDoi:verified:' + recId);
-      okAssu.ubhdOptim = v;
-      okAssu.subjTgt = reviAnno.relations.subject;
-      const okDoi = okAssu.reviDoi;
-      if (v === okDoi) {
-        data['dc:identifier'] = 'urn:doi:' + v;
-        job.assume('legacyDoi:converted:' + recId, { confirmed: true });
-        job.counters.add('legacyDoi:converted');
-        return;
-      }
-      console.warn('Omit unverified legacy DOI @', recId);
-      job.counters.add('legacyDoi:omitUnverified');
-      return;
-    }
 
     if ((k === 'via') || (k === 'versionOf')) {
       const caid = reviAnno.divePath.expectedContainerAnnoId;

@@ -52,6 +52,7 @@ const EX = {
     const assu = job.assume('sameDataAsLatestRevision:' + container.recId);
     vTry(verify.oldRevision, 'Latest revision (+) =/= container (-)')({
       expectedData: container.data,
+      expectedMeta: container.meta,
       job,
       reviRecId: reviAnno.recId,
       reviDivePath: dp,

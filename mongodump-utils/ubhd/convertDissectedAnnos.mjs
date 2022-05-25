@@ -78,9 +78,9 @@ reg([
 
 function badDoi(mongoId, recIdSuffix, doiPrefix, badSuffix) {
   function killDoi(anno) {
-    const { data } = anno;
-    eq(data.doi, doiPrefix + mongoId + badSuffix);
-    delete data.doi;
+    const { meta } = anno;
+    eq(meta.doi, doiPrefix + mongoId + badSuffix);
+    meta.doi = null;
     job.counters.add('acknowledgedBadDoi');
   }
   hotfixes[mongoId + recIdSuffix] = killDoi;

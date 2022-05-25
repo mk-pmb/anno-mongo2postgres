@@ -14,11 +14,14 @@ const { annoBaseUrl } = ubFacts;
 
 const EX = function rewriteReplyTo(anno, job) {
   const {
+    meta,
     data,
     relations,
   } = anno;
+  meta.debug_replyto = '';
   const origReplyTo = anno.api.popData('nonEmpty str | undef', 'replyTo');
   if (!origReplyTo) { return; }
+  meta.debug_replyto = origReplyTo;
 
   const parentAnnoId = EX.findParentAnnoId(anno);
   const parentAnnoUrlRel = parentAnnoId;

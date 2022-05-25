@@ -11,6 +11,7 @@ import verifyReviUrl from './reviUrl.mjs';
 const EX = function verifyOldRevision(how, origRevi, reviIdx) {
   const {
     expectedData,
+    expectedMeta,
     job,
   } = how;
   mustBe('obj', 'how.job')(job);
@@ -23,8 +24,7 @@ const EX = function verifyOldRevision(how, origRevi, reviIdx) {
     verifyReviUrl(revi, 'id', { reviNum });
     verifyReviUrl(revi, 'versionOf');
     verifyReviUrl(revi, 'via');
-    const reviDoi = popRevi('nonEmpty str | undef', 'doi');
-    verifyOldReviDoi(expectedData.doi, reviDoi, reviNum, how);
+    verifyOldReviDoi(expectedMeta.doi, revi.meta.doi, reviNum, how);
 
     const allSubRevis = popRevi('undef | ary', '_revisions');
     (allSubRevis || []).forEach(EX.bind(null, how));

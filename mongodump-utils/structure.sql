@@ -13,9 +13,10 @@ CREATE TABLE "public"."anno_data" (
     "revision_id" smallint NOT NULL,
     "time_created" timestamptz NOT NULL,
     "author_local_userid" character varying NOT NULL,
+    "debug_doi_verified" character varying,
+    "debug_replyto" character varying,
     "details" json NOT NULL,
     CONSTRAINT "anno_details_anno_id_revision_id" UNIQUE ("anno_id", "revision_id"),
-    CONSTRAINT "anno_doi" UNIQUE ("doi"),
     CONSTRAINT "anno_pkey" PRIMARY KEY ("pg_row_id")
 ) WITH (oids = false);
 

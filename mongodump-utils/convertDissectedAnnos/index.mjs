@@ -31,6 +31,9 @@ const conv = {
   optimizeReviDetails,
   parseDivePath,
 
+  doiUriPrefix: 'https://doi.org/',
+  // ^- NB: The urn:doi: namespace was _not_ registered.
+
   async cliCleanup(job) {
     fmtInserts.endAll(job);
   },
