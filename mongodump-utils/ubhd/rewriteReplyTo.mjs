@@ -18,16 +18,19 @@ const EX = function rewriteReplyTo(anno, job) {
   delete data.replyTo;
   if (!replyTo) { return; }
 
-  const caid = anno.divePath.expectedContainerAnnoId;
-  const parentAnnoId = caid.replace(/\.\d+$/, '');
-  const parentAnnoUrlAbs = annoBaseUrl + 'anno/' + parentAnnoId;
+  const parentAnnoId = EX.findParentAnnoId(anno);
   const parentAnnoUrlRel = parentAnnoId;
+  const parentAnnoUrlAbs = annoBaseUrl + 'anno/' + parentAnnoId;
 
   namedEqual('original replyTo', replyTo, parentAnnoUrlAbs);
   mustBe.prop(data, [['oneOf', [
     undefined,
     'replying',
   ]]], 'purpose');
+  mustBe.tProp('body', data.body, [['oneOf', [
+    undefined,
+    'replying',
+  ]]], 'motivation');
 
   const [origTgt] = mustBe('ary ofLength:1', 'original targets list')(
     [].concat(data.target));
@@ -51,6 +54,18 @@ const EX = function rewriteReplyTo(anno, job) {
   data['as:inReplyTo'] = parentAnnoUrlRel;
   relations.inReplyTo = parentAnnoUrlRel;
 };
+
+
+Object.assign(EX, {
+
+  findParentAnnoId(anno) {
+    const caid = anno.divePath.expectedContainerAnnoId;
+    const { recId } = anno;
+    if (recId === 'Cd6tRIwaThmpMnetnDqJKQ>dp-cv-0-0') { return caid; }
+    return caid.replace(/\.\d+$/, '');
+  },
+
+});
 
 
 export default EX;
