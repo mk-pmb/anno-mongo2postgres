@@ -1,8 +1,5 @@
 
-# Temporary files:
-/tmp.*
-
 # Files with data potentially relevant for GDPR:
-/creatorAliases.ubhd.json
+/creatorAliases.json
 
 # unsorted (this section should be empty):

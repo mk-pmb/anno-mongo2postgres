@@ -42,14 +42,14 @@ function lrl9e9 () {
   local JOB=()
   if [ "$1" == '>' ]; then JOB+=( "$1" "$2" ); shift 2; fi
   JOB+=( "$1" ); shift
-  ../mongodump-utils/lint-run-log.sh "${JOB[@]}" limit=9e9 "$@"
+  ../src/lint-run-log.sh "${JOB[@]}" limit=9e9 "$@"
 }
 
 
 function lrl_cda () {
   lrl9e9 ubhd/convertDissectedAnnos "$@" || return $?
   concat_sql_files tmp.pg.anno_combo.sql \
-    ../mongodump-utils/structure.sql \
+    ../src/structure.sql \
     tmp.pg.anno_*.sql || return $?
   rm -- tmp.pg.anno_*.sql.gz
   gzip tmp.pg.anno_*.sql || return $?
