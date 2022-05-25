@@ -70,6 +70,10 @@ reg([
   'Cd6tRIwaThmpMnetnDqJKQ>dp-cvv-0-0-0',
 ], propSed('', 'replyTo', [[/$/, '.1']]));
 
+reg([
+  'RVbNc1xlSDKx5k7HznPMMw>dp-v-4',
+], propSed('', 'via', [[/~\d+$/, '']]));
+
 
 
 function badDoi(mongoId, recIdSuffix, doiPrefix, badSuffix) {
