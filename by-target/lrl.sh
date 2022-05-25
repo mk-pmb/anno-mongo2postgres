@@ -8,7 +8,10 @@ function cli_main () {
 
   local TASK="$1"; shift
   case "$TASK" in
-    clean ) clear_cache;;
+    clean )
+      clear_cache || return $?
+      rm -- tmp.* || return $?
+      ;;
     dis ) re_diss "$@";;
     dis- ) re_diss_digi +cpg389+annotationen_test "$@";;
     pg ) lrl_cda <tmp.dissect.all.json "$@";;
