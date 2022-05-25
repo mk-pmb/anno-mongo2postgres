@@ -12,7 +12,7 @@ function collect_by_mongoid () {
   case "${MONGO_IDS[0]}" in
     err )
       MONGO_IDS=( "$(grep -Fe 'errorsIds: [' -A $MAX_LN \
-        -- ../../mongodump-utils/tmp.convertSimpleAnnos.err \
+        -- ../../src/tmp.convertSimpleAnnos.err \
         | grep -m 1 -Fe ']' -B $MAX_LN)" )
       ;;
   esac
