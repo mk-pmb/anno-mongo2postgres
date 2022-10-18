@@ -1,5 +1,5 @@
 { "name": "anno-mongo2postgres",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Tools for converting anno-backend MongoDB dumps",
   "keywords": [],
 

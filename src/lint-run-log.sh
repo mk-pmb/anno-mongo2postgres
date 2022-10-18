@@ -14,7 +14,8 @@ function lint_and_run () {
   [[ "$MJS" == /* ]] || MJS="$SELFPATH/$MJS"
   [ -f "$MJS" ] || return 4$(echo "E: no such file: $MJS" >&2)
 
-  cwd+exec "$SELFPATH" elp >&2 || return $?
+  just_lint >&2 || return $?
+
 
   local TMP_BFN="$SELFPATH/tmp.${BFN//\//.}"
   nodemjs "$MJS" "$@" \
@@ -22,6 +23,15 @@ function lint_and_run () {
     > >(unbuffered tee -- "$TMP_BFN.txt") \
     || return $?
 }
+
+
+function just_lint () {
+  cd -- "$SELFPATH" || return $?
+  if which elp | grep -qFe '^/'; then elp || return $?; fi
+  eslint --ext=js,mjs . && echo '+OK eslint succeeded.' || return $?
+}
+
+
 
 
 lint_and_run "$@"; exit $?
