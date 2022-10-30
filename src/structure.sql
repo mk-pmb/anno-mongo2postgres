@@ -32,7 +32,7 @@ CREATE SEQUENCE anno_targets_pg_row_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 21474
 CREATE TABLE "public"."anno_links" (
     "pg_row_id" integer DEFAULT nextval('anno_targets_pg_row_id_seq') NOT NULL,
     "anno_id" character varying NOT NULL,
-    "revision_id" character varying NOT NULL,
+    "revision_id" smallint NOT NULL,
     "rel" character varying NOT NULL,
     "url" character varying NOT NULL,
     CONSTRAINT "anno_links_anno_id_revision_id_rel" UNIQUE ("anno_id", "revision_id", "rel"),
