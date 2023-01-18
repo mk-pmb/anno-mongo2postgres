@@ -18,8 +18,12 @@ const EX = async function optimizeReviDetails(reviAnno, job) {
   const { data } = reviAnno;
 
   if (data.creator === 'wgd@DWork') {
-    if (data.title && (!data.title.startsWith('Bildzyklus '))) {
-      data.title = 'Bildzyklus zum ›Welschen Gast‹, ' + data.title;
+    let title = data['dc:title'];
+    if (title) {
+      if (title.startsWith('Bildzyklus ')) {
+        title = 'Bildzyklus zum ›Welschen Gast‹, ' + title;
+      }
+      data['dc:title'] = title;
     }
   }
 
@@ -58,11 +62,11 @@ EX.standardTopLevelKeys = [
   'created',
   'creator',
   'dc:identifier',
+  'dc:title',
   'modified',
   'motivation',
   'rights',
   'target',
-  'title',
   'type',
 ];
 

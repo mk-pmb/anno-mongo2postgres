@@ -4,7 +4,9 @@
 const EX = async function optimizeReviDetails(anno, job) {
   const { data } = anno;
   data.created = anno.meta.time_created;
-  data.title = String(data.title || '').trim();
+  const title = String(data['dc:title'] || data.title || '').trim();
+  delete data.title;
+  if (title) { data['dc:title'] = title; }
   EX.maybeConvertLegacyDoi(anno, job);
 };
 
