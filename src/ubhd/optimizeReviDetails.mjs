@@ -3,6 +3,7 @@
 import equal from 'equal-pmb';
 // import mustBe from 'typechecks-pmb/must-be.js';
 import objMapValues from 'lodash.mapvalues';
+import uuidv5 from 'uuidv5';
 
 import rewriteReplyTo from './rewriteReplyTo.mjs';
 import ubFacts from './facts.mjs';
@@ -18,6 +19,8 @@ const EX = async function optimizeReviDetails(reviAnno, job) {
   const { data } = reviAnno;
 
   if (data.creator === 'wgd@DWork') {
+    data.creator = EX.wgdAuthorAgent;
+
     let title = data['dc:title'];
     if (title) {
       if (title.startsWith('Bildzyklus ')) {
@@ -44,6 +47,14 @@ const EX = async function optimizeReviDetails(reviAnno, job) {
     console.warn('nonStandardTopLevelKey:', k, v);
     job.counters.add('nonStandardTopLevelKey:' + k + '=' + v);
   });
+};
+
+
+EX.wgdAuthorAgent = {
+  id: ('urn:uuid:' + uuidv5('url',
+    'https://digi.ub.uni-heidelberg.de/wgd/index/welscher_gast.html')),
+  name: 'Projekt ›Welscher Gast digital‹',
+  type: 'Organization',
 };
 
 
