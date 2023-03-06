@@ -30,6 +30,11 @@ const EX = async function optimizeReviDetails(reviAnno, job) {
     }
   }
 
+  if ((data.creator || false).displayName) {
+    const { displayName, ...other } = data.creator;
+    data.creator = { name: displayName, ...other };
+  }
+
   // const origData = { ...data };
   function omitKey(k) { delete data[k]; }
   EX.computableTopLevelKeys.forEach(omitKey);
