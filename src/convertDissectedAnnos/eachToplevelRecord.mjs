@@ -69,9 +69,26 @@ const eachTLR = async function eachToplevelRecord(dissected, recId, job) {
   await (job.hotfixes[topMongoId + '>*'] || doNothing)(anno, job);
   await (job.hotfixes[recId] || doNothing)(anno, job);
 
+  (function modernizeTargetUrls() {
+    // We have to update the targets in the actual anno, rather than just
+    // in anno_links, because otherwise revisions (and potentially replies)
+    // will be submitted with the original target URL and thus won't be
+    // found by search.
+    const origTgtJson = JSON.stringify(anno.data.target);
+    function foundUrl(m, pre) {
+      if (m.endsWith('\\"')) {
+        throw new Error('Backslashed quotes in URL not supported: ' + m);
+      }
+      const orig = JSON.parse(m.slice(pre.length));
+      return pre + JSON.stringify(job.modernizeUrl(orig));
+    }
+    const upd = origTgtJson.replace(/(:)"\w+:\/{2,}[!#-~]+"/, foundUrl);
+    anno.data.target = JSON.parse(upd);
+  }());
+
   (function determineSubjectTarget() {
     // Determine only after hotfixes have been applied.
-    const subjTgt = job.modernizeUrl(guessSubjectTarget(anno.data).url);
+    const subjTgt = guessSubjectTarget(anno.data).url;
     anno.relations.subject = subjTgt;
     equal(subjTgt, annoCache.topAnno.relations.subject);
   }());
