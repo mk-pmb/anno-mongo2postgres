@@ -26,9 +26,10 @@ function lint_and_run () {
 
 
 function just_lint () {
-  cd -- "$SELFPATH" || return $?
+  pushd -- "$SELFPATH" >/dev/null || return $?
   if which elp | grep -qFe '^/'; then elp || return $?; fi
   eslint --ext=js,mjs . && echo '+OK eslint succeeded.' || return $?
+  popd >/dev/null || return $?
 }
 
 
