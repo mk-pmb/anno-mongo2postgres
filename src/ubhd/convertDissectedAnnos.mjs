@@ -28,8 +28,6 @@ Object.assign(job, {
   badDoiReportPrefix: ubFacts.digiDoi,
 });
 
-Object.assign(job.modernizeUrl.forHosts, ubFacts.modernizeUrlForHosts);
-
 
 function reg(recIds, fix) {
   recIds.forEach(function register(recId) { hotfixes[recId] = fix; });

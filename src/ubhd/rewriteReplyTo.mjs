@@ -12,7 +12,7 @@ const { annoBaseUrl } = ubFacts;
 
 
 
-const EX = function rewriteReplyTo(anno, job) {
+const EX = function rewriteReplyTo(anno) {
   const {
     meta,
     data,
@@ -41,7 +41,7 @@ const EX = function rewriteReplyTo(anno, job) {
     [].concat(data.target));
   mustBe('obj', 'original first target')(origTgt);
   const popTgt = objPop(origTgt, { mustBe }).mustBe;
-  const origScope = job.modernizeUrl(popTgt('nonEmpty str | undef', 'scope'));
+  const origScope = popTgt('nonEmpty str | undef', 'scope');
   namedEqual('original scope URL', origScope, relations.subject);
   const origTgtSel = popTgt('obj | undef', 'selector');
   if (origTgtSel) {

@@ -7,6 +7,10 @@
 /latest.users.yaml
 
 # Auto-generated cache files
+/http_urls.all_raw.txt.gz
+
+# Reports on the data
+/http_urls.unknown.txt
 
 
 

@@ -57,21 +57,6 @@ const jobApi = {
     this[name] = func;
   },
 
-  modernizeUrl: Object.assign(function modernizeUrl(orig) {
-    let url = orig;
-    const host = (orig.split(/\/+/)[1] || '[/ found no hostname /]');
-    const c = getOwn(modernizeUrl.forHosts, host);
-    if (c === false) { return orig; }
-    if (c !== true) {
-      throw new Error('Dunno if we can modernizeUrl for host ' + host);
-    }
-
-    url = url.replace(/^(http):/, '$1s:');
-    return url;
-  }, {
-    forHosts: {},
-  }),
-
 };
 
 
