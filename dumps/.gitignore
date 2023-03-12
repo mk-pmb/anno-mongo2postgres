@@ -1,4 +1,13 @@
 
+# Actual database dumps
 /[0-9]*.jsonld
+/[0-9]*.yaml
 /*.+*+*.jsonld
-/latest.jsonld
+/latest.anno.jsonld
+/latest.users.yaml
+
+# Auto-generated cache files
+
+
+
+# Unsorted stuff (this section should be empty):
