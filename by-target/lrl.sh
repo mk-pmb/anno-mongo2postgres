@@ -24,7 +24,7 @@ function cli_main () {
 
 function re_diss () {
   clear_cache || return $?
-  lrl9e9 ubhd/dissect "$@" <../dumps/latest.jsonld || return $?
+  lrl9e9 ubhd/dissect "$@" <../dumps/latest.anno.jsonld || return $?
 }
 
 
