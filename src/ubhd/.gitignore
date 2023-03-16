@@ -1,5 +1,7 @@
 
-# Files with data potentially relevant for GDPR:
-/creatorAliases.json
+# Temporary files
+/tmp.*
+
+
 
 # unsorted (this section should be empty):
