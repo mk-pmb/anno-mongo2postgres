@@ -5,7 +5,6 @@ import objDive from 'objdive';
 
 import badDois from './badDois.json';
 import cda from '../convertDissectedAnnos/index.mjs';
-import creatorAliases from './creatorAliases.json';
 import idFormats from './idFormats.mjs';
 import optimizeReviDetails from './optimizeReviDetails.mjs';
 import sharedHotfixes from './sharedHotfixes.mjs';
@@ -24,7 +23,6 @@ Object.assign(job.idFormatRegExps, idFormats.extraRegExps);
 
 
 Object.assign(job, {
-  creatorAliases,
   badDoiReportPrefix: ubFacts.digiDoi,
 });
 
