@@ -124,6 +124,7 @@ trafoCli.core = async function trafoCliCore(coreArgs) {
       report.counters.add('success');
     } catch (err) {
       job.errorsIds.push(mongoId);
+      if (!job.firstErrMsg) { job.firstErrMsg = String(err); }
       report.counters.add('error');
       remainMaxErr -= 1;
       console.error('v-- Error @', { idx, progress }, { mongoId });
@@ -158,6 +159,7 @@ trafoCli.core = async function trafoCliCore(coreArgs) {
     ...report,
   });
 
+  if (job.firstErrMsg) { console.error('First error was:', job.firstErrMsg); }
   await (job.cliCleanup || doNothing)(job);
 };
 
