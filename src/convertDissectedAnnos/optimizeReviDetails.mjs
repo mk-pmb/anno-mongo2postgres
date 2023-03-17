@@ -11,6 +11,10 @@ const EX = async function optimizeReviDetails(anno, job) {
 };
 
 
+EX.diglitBaseUrl = 'https://digi.ub.uni-heidelberg.de/diglit/';
+EX.annoTestBaseUrl = EX.diglitBaseUrl + 'annotationen_test/';
+
+
 Object.assign(EX, {
 
   maybeConvertLegacyDoi(anno, job) {
@@ -22,9 +26,12 @@ Object.assign(EX, {
     //    the same fields.
 
     if (!doi) { return; }
+    const subjTgtUrl = anno.relations.subject;
+    if (subjTgtUrl.startsWith(EX.annoTestBaseUrl)) { return; }
+
     const okAssu = job.assume('legacyDoi:verified:' + recId);
     okAssu.assumedByOptim = doi;
-    okAssu.subjTgt = anno.relations.subject;
+    okAssu.subjTgt = subjTgtUrl;
     const okDoi = okAssu.reviDoi;
     meta.debug_doi_verified = okDoi;
     if (doi === okDoi) {
