@@ -6,6 +6,12 @@ function cli_main () {
   local SELFPATH="$(readlink -m -- "$BASH_SOURCE"/..)"
   cd -- "$SELFPATH" || return $?
 
+  local MAX_MEM_MB=2048
+  # ^-- @2023-03-17, node.js somehow went wild and forced the kernel into
+  #     OOM, seemingly by JSON.parse. This has never happened before for
+  #     this dump, so it's probably very rare. Let's defend nonetheless.
+  ulimit -v $(( $MAX_MEM_MB * 1024 ))
+
   local TASK="$1"; shift
   case "$TASK" in
     clean )
