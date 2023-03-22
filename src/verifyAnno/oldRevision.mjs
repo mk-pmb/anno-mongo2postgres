@@ -24,7 +24,8 @@ const EX = function verifyOldRevision(how, origRevi, reviIdx) {
     verifyReviUrl(revi, 'id', { reviNum });
     verifyReviUrl(revi, 'versionOf');
     verifyReviUrl(revi, 'via');
-    verifyOldReviDoi(expectedMeta.doi, revi.meta.doi, reviNum, how);
+    verifyOldReviDoi(expectedMeta.unverifiedDoi,
+      revi.meta.unverifiedDoi, reviNum, how);
 
     const allSubRevis = popRevi('undef | ary', '_revisions');
     (allSubRevis || []).forEach(EX.bind(null, how));

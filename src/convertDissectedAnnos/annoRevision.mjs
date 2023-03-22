@@ -13,7 +13,7 @@ async function annoRevision(job, reviAnno) {
   mustBe('obj', 'container (dp: "' + dp.container + '")')(container);
   equal(container === reviAnno, false);
 
-  const mongoId = mustBe.nest('mongoId', reviAnno.meta.mongo_doc_id);
+  const mongoId = mustBe.nest('mongoId', reviAnno.mongoDocId);
   countIdFormats(job, mongoId);
   if (container.id) { equal(container.id, dp.expectedContainerAnnoId); }
 

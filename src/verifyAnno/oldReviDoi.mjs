@@ -12,11 +12,11 @@ const EX = function oldReviDoi(containerDoi, reviDoi, reviNum, how) {
   let doiErr;
   try {
     mustBe([['oneOf', [
-      null,
+      undefined,
       (containerDoi + '~' + reviNum),
       (containerDoi + '_' + reviNum),
     ]]], 'DOI-bearing annotation > revision > doi')(reviDoi);
-    if (reviDoi === null) { return; }
+    if (reviDoi === undefined) { return; }
 
     const reviRecId = mustBe.nest('reviRecId', how.reviRecId);
     const assuKey = 'legacyDoi:verified:' + reviRecId;

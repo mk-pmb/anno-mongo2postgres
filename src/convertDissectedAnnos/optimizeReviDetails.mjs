@@ -18,26 +18,26 @@ EX.annoTestBaseUrl = EX.diglitBaseUrl + 'annotationen_test/';
 Object.assign(EX, {
 
   maybeConvertLegacyDoi(anno, job) {
-    const { recId, meta, data } = anno;
-    const { doi } = anno.meta;
+    const { recId, meta } = anno;
+    const { unverifiedDoi } = meta;
+    delete meta.unverifiedDoi;
 
     meta.debug_doi_verified = null;
     // ^- must always be set because all records in a table must have
     //    the same fields.
 
-    if (!doi) { return; }
+    if (!unverifiedDoi) { return; }
     const subjTgtUrl = anno.relations.subject;
     if (subjTgtUrl.startsWith(EX.annoTestBaseUrl)) { return; }
 
     const okAssu = job.assume('legacyDoi:verified:' + recId);
-    okAssu.assumedByOptim = doi;
+    okAssu.assumedByOptim = unverifiedDoi;
     okAssu.subjTgt = subjTgtUrl;
     const okDoi = okAssu.reviDoi;
     meta.debug_doi_verified = okDoi;
-    if (doi === okDoi) {
+    if (unverifiedDoi === okDoi) {
       const { relations } = anno;
-      data['dc:identifier'] = job.doiUriPrefix + doi;
-      relations.doi = doi;
+      relations.doi = job.doiUriPrefix + okDoi;
       job.assume('legacyDoi:converted:' + recId, { confirmed: true });
       job.counters.add('legacyDoi:converted');
       return;
