@@ -57,8 +57,9 @@ function lrl9e9 () {
 
 function lrl_cda () {
   lrl9e9 ubhd/convertDissectedAnnos "$@" || return $?
-  concat_sql_files tmp.pg.anno_combo.sql \
-    ../src/structure.sql \
+  local STRU='../src/tmp.structure.sql'
+  nodemjs ../src/structure.gen.mjs >"$STRU" || return $?
+  concat_sql_files tmp.pg.anno_combo.sql "$STRU" \
     tmp.pg.anno_*.sql || return $?
   rm -- tmp.pg.anno_*.sql.gz
   gzip tmp.pg.anno_*.sql || return $?
