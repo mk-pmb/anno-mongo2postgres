@@ -18,13 +18,13 @@ const dfOpt = {
 
 console.log(pgDumpWriter.fmtCreateSimpleTable('data', {
   doi: 'char* ?',
-  mongo_doc_id: 'char* ? B',
   ...annoAddrTypes,
   time_created: 'ts',
   author_local_userid: 'char* B',
+  details: 'json',
+  debug_mongo_doc_id: 'char* ? B',
   debug_doi_verified: 'char* ?',
   debug_replyto: 'char* ?',
-  details: 'json',
 }, {
   ...dfOpt,
 }));
@@ -37,3 +37,18 @@ console.log(pgDumpWriter.fmtCreateSimpleTable('links', {
 }, {
   ...dfOpt,
 }));
+
+
+console.log(pgDumpWriter.fmtCreateSimpleTable('stamps', {
+  ...annoAddrTypes,
+  st_type: 'char* ¹addr',
+  st_at: 'ts',
+  st_by: 'char*',
+  st_detail: 'json ?',
+}, {
+  ...dfOpt,
+}));
+
+
+
+// eof
