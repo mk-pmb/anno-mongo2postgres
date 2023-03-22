@@ -41,7 +41,7 @@ const EX = function fmtInserts(anno, auxMeta) {
   };
   writeRec(adRec);
 
-  objMapValues(anno.relations, function declareLink(url, rel) {
+  objMapValues(anno.relations, function declare(url, rel) {
     const linkRec = { TABLE: 'anno_links', rel, url };
     writeRec(linkRec);
   });

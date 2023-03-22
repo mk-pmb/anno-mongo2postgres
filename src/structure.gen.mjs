@@ -17,7 +17,6 @@ const dfOpt = {
 
 
 console.log(pgDumpWriter.fmtCreateSimpleTable('data', {
-  doi: 'char* ?',
   ...annoAddrTypes,
   time_created: 'ts',
   author_local_userid: 'char* B',

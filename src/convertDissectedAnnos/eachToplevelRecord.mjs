@@ -27,7 +27,7 @@ function reorganizeCommonNonStandardTopLevelProps(recId, origData) {
   const anno = cloneAnno({ recId, data: origData });
   const { popData } = anno.api;
 
-  const doi = (popData('nonEmpty str | undef', 'doi') || null);
+  const unverifiedDoi = (popData('nonEmpty str | undef', 'doi') || null);
   namedEqual('Expected no previous dc:*',
     origData['dc:identifier'], undefined);
 
@@ -41,7 +41,7 @@ function reorganizeCommonNonStandardTopLevelProps(recId, origData) {
   anno.meta = {
     time_created: pgDumpWriter.timestampFromIsoFmt(origCreatedStr),
     author_local_userid: '',
-    doi,
+    unverifiedDoi,
   };
 
   return anno;
@@ -64,7 +64,8 @@ const eachTLR = async function eachToplevelRecord(dissected, recId, job) {
     job.annoCache = annoCache; // eslint-disable-line no-param-reassign
     job.hint('latestTopAnnoRecIdx', job.topRecIdx);
   }
-  anno.meta.mongo_doc_id = annoCache.topMongoId;
+  anno.mongoDocId = annoCache.topMongoId;
+  anno.meta.debug_mongo_doc_id = anno.mongoDocId;
 
   await (job.hotfixes[topMongoId + '>*'] || doNothing)(anno, job);
   await (job.hotfixes[recId] || doNothing)(anno, job);
