@@ -1,3 +1,20 @@
 
+# ========================================================================
+# External resources:
+# ========================================================================
+
+/dbinit_structure.gen.mjs
+# ^-- Should be a symlink to `util/pg/dbinit_structure.gen.mjs` from
+#     anno-server-22. An empty file will suffice to silence the failure.
+
+
+
+# ========================================================================
+# Auto-generated files:
+# ========================================================================
 /[a-z0-9]*.*/
 /tmp.*
+
+
+
+# Unsorted stuff (this section should be empty):

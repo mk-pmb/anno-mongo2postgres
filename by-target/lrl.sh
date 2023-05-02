@@ -56,13 +56,21 @@ function lrl9e9 () {
 
 
 function lrl_cda () {
+  local DB_INIT='dbinit_structure.gen.mjs'
+  [ -f "$DB_INIT" ] || return 4$(
+    echo "E: Missing $DB_INIT! Read .gitignore for how to fix." >&2)
+  local STRU='tmp.structure.sql'
+  nodemjs "$DB_INIT" >"$STRU" || return $?
+
   lrl9e9 ubhd/convertDissectedAnnos "$@" || return $?
-  local STRU='../src/tmp.structure.sql'
-  nodemjs ../src/structure.gen.mjs >"$STRU" || return $?
+
   concat_sql_files tmp.pg.anno_combo.sql "$STRU" \
     tmp.pg.anno_*.sql || return $?
   rm -- tmp.pg.anno_*.sql.gz
   gzip tmp.pg.anno_*.sql || return $?
+
+  grep -qPe '^CREATE TABLE ' -- "$STRU" \
+    || echo "W: Found no 'CREATE TABLE' in $STRU!" >&2
 }
 
 
