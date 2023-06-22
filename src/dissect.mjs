@@ -33,10 +33,12 @@ const save = {
   async json(destBase, data) {
     let text = safeSortedJsonify(data);
     text = text.replace(/(\n {2})("\w+":)( ["\d])/g, '$1$2$1 $3');
-    const destFull = destBase + '.json';
-    // console.warn('saveJson', destFull);
     combinedOutput.write(text + ',\n');
-    await promiseFs.writeFile(destFull, text + '\n');
+    if (!destBase.startsWith('void://')) {
+      const destFull = destBase + '.json';
+      // console.warn('saveJson', destFull);
+      await promiseFs.writeFile(destFull, text + '\n');
+    }
   },
 
   async splitHistory(how, anno) {
@@ -93,10 +95,22 @@ const jobSpec = {
   rewriteRevHost: String,
   rewriteSaveDir: String,
   onlySaveDirs: makeUrlPrefixesFilter(),
+  saveDumpsBasePath: 'void://',
 
   async cliInit(job) {
     job.onlySaveDirs.addPrefixes(splitSpace(job.cliOpt.onlySaveDirs));
     job.onlySaveDirs.addPrefixes(splitSpace(process.env.dissect_only_savedir));
+
+    (function decideSaveDumps() {
+      let sd = job.cliOpt.saveDumps;
+      if (sd === undefined) { return; }
+      if ((!sd) || (sd === '.') || (sd === './')) {
+        sd = '';
+      } else if (!sd.endsWith('/')) {
+        sd += '/';
+      }
+      job.saveDumpsBasePath = sd; // eslint-disable-line no-param-reassign
+    }());
   },
 
   async eachToplevelRecord(anno, mongoId, job) {
@@ -118,13 +132,19 @@ const jobSpec = {
 
     const complexity = rateAnnoDepthComplexity(anno);
     job.counters.add('tlr:' + complexity);
+    // ^-- depth complexity of the TLR = Top Level Record.
     const saveAsBaseName = [
       ...tgt.pathParts.slice(-1),
       mongoId,
       complexity,
       '',
     ].join('.');
-    await promiseFs.mkdirs(saveDir);
+
+    saveDir = job.saveDumpsBasePath + saveDir;
+    if (!saveDir.startsWith('void://')) {
+      await promiseFs.mkdirs(saveDir);
+    }
+
     await save.splitHistory({
       job,
       mongoId,
