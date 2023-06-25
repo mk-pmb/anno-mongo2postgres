@@ -20,14 +20,12 @@
 
   "engines": { "npm": ">=7.0.0", "node": ">=16.0.0" },
   "dependencies": {
-    "absdir": "^1.0.6",
     "cfg-cli-env-180111-pmb": "^0.1.2",
     "count-map-pmb": "^0.1.1",
     "deepsortobj": "^0.1.3",
     "delay": "^4.4.1",
     "equal-pmb": "^0.1.24",
     "filter-container-entries-pmb": "^0.2.0",
-    "get-stdin": "^6.0.0",
     "getown": "^1.0.0",
     "is-string": "^1.0.7",
     "lodash.mapvalues": "^4.6.0",
@@ -37,14 +35,15 @@
     "objpop": "^0.3.1",
     "p-each-series": "^2.2.0",
     "p-fatal": "^0.1.3",
-    "postgres-dump-writer-helpers-220524-pmb": "^0.1.1",
+    "postgres-dump-writer-helpers-220524-pmb": "^0.1.6",
     "read-data-file": "^2.0.8",
+    "read-relaxed-json-from-stdin-pmb": "^1.0.0",
     "safe-sortedjson": "^1.0.8",
-    "typechecks-pmb": "^0.200620.6",
+    "typechecks-pmb": "^0.230515.2",
     "usnam-pmb": "^0.2.5",
     "uuidv5": "^1.0.0",
     "vtry": "^1.0.9",
-    "webanno-guess-subject-target-url-pmb": "^1.0.1"
+    "webanno-guess-subject-target-url-pmb": "^1.0.3"
   },
   "devDependencies": {
     "eslint-config-nodejs-pmb": "^0.3.5",
