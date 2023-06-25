@@ -7,10 +7,8 @@ import getOwn from 'getown';
 import makeFilter from 'filter-container-entries-pmb';
 import pDelay from 'delay';
 import pEachSeries from 'p-each-series';
+import readRelaxedJsonFromStdin from 'read-relaxed-json-from-stdin-pmb';
 import vTry from 'vtry';
-
-
-import readRelaxedJsonFromStdin from './readRelaxedJsonFromStdin.mjs';
 
 
 const doNothing = Boolean;
@@ -101,7 +99,11 @@ trafoCli.core = async function trafoCliCore(coreArgs) {
   const timeStarted = Date.now();
   await (job.cliInit || doNothing)(job);
 
-  const data = await readRelaxedJsonFromStdin(cliOpt);
+  const data = await readRelaxedJsonFromStdin({
+    ...cliOpt,
+    defaultLimit: 1e3,
+    logFunc: console.error,
+  });
   const nSliced = data.length;
   const maxErr = Math.max((+cliOpt.maxerr || 0), 0) || 1;
   const progressInterval = (+cliOpt.prgi || 1e3);
