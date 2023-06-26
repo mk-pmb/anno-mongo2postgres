@@ -33,7 +33,7 @@ const EX = {
     // °  equal.named.deepStrictEqual('Deep revision is redundant copy',
     // °    reviAnno.data, shallowRevi.data);
     // °  // The above expectation has been verified: The deep revision
-    // °  // is a redundant copy, so can safely discard it.
+    // °  // is a redundant copy, so we can safely discard it.
     // °°°° … our data would be this clean.
     // Fortunately, for discarding the reviAnno, we can settle with a
     // lesser assumption:
