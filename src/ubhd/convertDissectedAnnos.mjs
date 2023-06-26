@@ -11,7 +11,7 @@ import sharedHotfixes from './sharedHotfixes.mjs';
 import ubFacts from './facts.mjs';
 
 
-const { job } = cda;
+const job = cda.getJob();
 const {
   hotfixes,
 } = job;
