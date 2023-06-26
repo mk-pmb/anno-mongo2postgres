@@ -4,7 +4,7 @@ import sharedHotfixes from './sharedHotfixes.mjs';
 import diss from '../dissect.mjs';
 
 
-const { job } = diss;
+const job = diss.getJob();
 
 sharedHotfixes.addSkips(job);
 

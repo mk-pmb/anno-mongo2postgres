@@ -78,8 +78,10 @@ function trafoCli(origJobSpec) {
     ...report,
   };
   const coreArgs = {
-    job,
-    report,
+    // We wrap them in getters in order to avoid bloating the error message
+    // in case the trafoPr is rejected.
+    getJob() { return job; },
+    getReport() { return report; },
   };
 
   const trafoPr = pDelay(10).then(() => trafoCli.core(coreArgs));
@@ -90,11 +92,9 @@ function trafoCli(origJobSpec) {
 
 
 trafoCli.core = async function trafoCliCore(coreArgs) {
-  const {
-    job,
-    report,
-  } = coreArgs;
+  const job = coreArgs.getJob();
   const { cliOpt } = job;
+  const report = coreArgs.getReport();
 
   const timeStarted = Date.now();
   await (job.cliInit || doNothing)(job);
