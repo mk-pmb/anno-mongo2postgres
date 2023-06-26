@@ -5,10 +5,14 @@ import CountMapPmb from 'count-map-pmb';
 import deepSortObj from 'deepsortobj';
 import getOwn from 'getown';
 import makeFilter from 'filter-container-entries-pmb';
+import mustBe from 'typechecks-pmb/must-be.js';
 import pDelay from 'delay';
 import pEachSeries from 'p-each-series';
 import readRelaxedJsonFromStdin from 'read-relaxed-json-from-stdin-pmb';
 import vTry from 'vtry';
+
+
+import mongoIdFakers from './mongoIdFakers.mjs';
 
 
 const doNothing = Boolean;
@@ -99,6 +103,12 @@ trafoCli.core = async function trafoCliCore(coreArgs) {
   const timeStarted = Date.now();
   await (job.cliInit || doNothing)(job);
 
+  const determineMongoId = (function decide() {
+    const fake = job.cliOpt.fakeMongoId;
+    if (!fake) { return rec => getOwn(rec, '_id'); }
+    return mustBe.enumDict(mongoIdFakers)(fake, 'CLI option "fakeMongoId"');
+  }());
+
   const data = await readRelaxedJsonFromStdin({
     ...cliOpt,
     defaultLimit: 1e3,
@@ -112,7 +122,7 @@ trafoCli.core = async function trafoCliCore(coreArgs) {
   await pEachSeries([].concat(data), async function topLevelRecord(rec, idx) {
     if (!remainMaxErr) { return; }
     job.topRecIdx = data.offset + idx;
-    const mongoId = getOwn(rec, '_id');
+    const mongoId = determineMongoId(rec, job);
     if (!mongoId) { console.error('W: no _id in record!', { idx, rec }); }
     if (job.skipMongoIds.has(mongoId)) { return job.skipRec(); }
 
