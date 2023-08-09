@@ -18,8 +18,8 @@ const EX = function fmtInserts(anno, auxMeta) {
   const reviNum = auxPop('pos int', 'reviNum').toFixed(0);
   verify.reviUrl(anno, 'id', { reviNum });
   const idParts = {
-    anno_id: anno.divePath.expectedContainerAnnoId,
-    revision_id: reviNum,
+    base_id: anno.divePath.expectedContainerAnnoId,
+    version_num: reviNum,
   };
 
   sqlWriter.writeRec({
