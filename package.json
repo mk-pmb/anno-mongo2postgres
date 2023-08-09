@@ -1,0 +1,22 @@
+{ "name": "anno-mongo2postgres",
+  "version": "0.444.4",
+  "description": "!! DEPRECATED !! Tools for converting anno-backend MongoDB dumps.",
+  "keywords": [],
+
+  "author": "M.K. (https://github.com/mk-pmb)",
+  "homepage": "https://github.com/mk-pmb/anno-mongo2postgres/#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mk-pmb/anno-mongo2postgres.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mk-pmb/anno-mongo2postgres/issues"
+  },
+  "contributors": [],
+
+  "private": true, "license": "MIT",
+
+
+
+  "engines": {}
+}
