@@ -23,6 +23,28 @@ Deprecated
 
 
 
+Zombie mode
+-----------
+
+#### ⚠ Unsupported
+
+This branch is no longer meant to be useful for general audiences,
+nor is it supported. It exists merely for a specific interim situation
+at the Heidelberg University Library.
+
+
+#### ⚠ Confusing/misleading code
+
+Nowadays, lots of the code in this repo is confusing and/or misleading
+because we changed the definitions of some of the technical terms in our
+other annotation software.
+We tried retrofitting the new vocabulary onto `anno-mongo2postgres`,
+but the concepts don't always match. Clarifying them wouldn't be worth
+the effort, because hopefully no-one else will ever need this tool.
+
+
+
+
 
 
 <!--#toc stop="scan" -->
