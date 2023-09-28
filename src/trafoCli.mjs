@@ -166,6 +166,7 @@ trafoCli.core = async function trafoCliCore(coreArgs) {
     durationMsec,
     ...report,
   });
+  await (job.optimizeTrafoReport || doNothing)(job);
   console.error('Done.', {
     durationMinutes: durationMsec / 60e3,
     ...report,

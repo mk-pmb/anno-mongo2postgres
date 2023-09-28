@@ -3,7 +3,8 @@
 import eq from 'equal-pmb';
 import objDive from 'objdive';
 
-import badDois from './badDois.json';
+import badDoisList from './badDois.json';
+import badDoisOptimizeReport from './badDois.optimizeReport.mjs';
 import cda from '../convertDissectedAnnos/index.mjs';
 import idFormats from './idFormats.mjs';
 import optimizeReviDetails from './optimizeReviDetails.mjs';
@@ -24,6 +25,11 @@ Object.assign(job.idFormatRegExps, idFormats.extraRegExps);
 
 Object.assign(job, {
   badDoiReportPrefix: ubFacts.digiDoi,
+
+  async optimizeTrafoReport(r) {
+    await badDoisOptimizeReport(r);
+  },
+
 });
 
 
@@ -85,7 +91,7 @@ function badDoi(mongoId, recIdSuffix, doiPrefix, badSuffix) {
   hotfixes[mongoId + recIdSuffix] = killDoi;
 }
 
-badDois.filter(Boolean).forEach((item) => {
+badDoisList.filter(Boolean).forEach((item) => {
   const [mongoId, reviIdx, wrongSuffix] = item;
   badDoi(mongoId, '>dp-v-' + reviIdx, ubFacts.digiDoi, wrongSuffix);
 });
