@@ -65,7 +65,7 @@ const eachTLR = async function eachToplevelRecord(dissected, recId, job) {
     job.hint('latestTopAnnoRecIdx', job.topRecIdx);
   }
   anno.mongoDocId = annoCache.topMongoId;
-  anno.meta.debug_mongo_doc_id = anno.mongoDocId;
+  // anno.meta.debug_mongo_doc_id = anno.mongoDocId;
 
   await (job.hotfixes[topMongoId + '>*'] || doNothing)(anno, job);
   await (job.hotfixes[recId] || doNothing)(anno, job);
