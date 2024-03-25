@@ -66,8 +66,11 @@ function lrl_cda () {
 
   lrl9e9 ubhd/convertDissectedAnnos "$@" || return $?
 
-  concat_sql_files tmp.pg.anno_combo.sql "$STRU" \
-    tmp.pg.anno_*.sql || return $?
+  local DATA_FILES=( tmp.pg.anno_*.sql )
+  concat_sql_files tmp.pg.anno_combo_reset.sql "$STRU" \
+    "${DATA_FILES[@]}" || return $?
+  concat_sql_files tmp.pg.anno_combo_add.sql \
+    "${DATA_FILES[@]}" || return $?
   rm -- tmp.pg.anno_*.sql.gz
   gzip tmp.pg.anno_*.sql || return $?
 }
