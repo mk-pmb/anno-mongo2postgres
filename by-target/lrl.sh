@@ -61,6 +61,8 @@ function lrl_cda () {
     echo "E: Missing $DB_INIT! Read .gitignore for how to fix." >&2)
   local STRU='tmp.structure.sql'
   nodemjs "$DB_INIT" >"$STRU" || return $?
+  grep -qPe '^CREATE TABLE ' -- "$STRU" \
+    || echo "W: Found no 'CREATE TABLE' in $STRU!" >&2
 
   lrl9e9 ubhd/convertDissectedAnnos "$@" || return $?
 
@@ -68,9 +70,6 @@ function lrl_cda () {
     tmp.pg.anno_*.sql || return $?
   rm -- tmp.pg.anno_*.sql.gz
   gzip tmp.pg.anno_*.sql || return $?
-
-  grep -qPe '^CREATE TABLE ' -- "$STRU" \
-    || echo "W: Found no 'CREATE TABLE' in $STRU!" >&2
 }
 
 
