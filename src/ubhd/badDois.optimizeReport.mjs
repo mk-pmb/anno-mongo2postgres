@@ -5,6 +5,7 @@ import fsPr from 'fs/promises';
 
 const EX = async function badDoisOptimizeReport(report) {
   const uncAss = report.unconfirmedAssumptions;
+  if (!uncAss) { return; }
   const prefixStr = 'legacyDoi:verified:';
   const prefixLen = prefixStr.length;
 
