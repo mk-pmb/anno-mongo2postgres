@@ -10,6 +10,8 @@ sharedHotfixes.addSkips(job);
 
 Object.assign(job, {
 
+  saveDumpsBasePath: '', // comment-out this line to disable per-anno files
+
   rewriteRevHost(origRevHost) {
     let rh = origRevHost;
     if (!/^[a-z]+\./.test(rh)) { return; }
