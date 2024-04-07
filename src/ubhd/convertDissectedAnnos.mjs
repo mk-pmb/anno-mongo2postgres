@@ -65,10 +65,10 @@ function propSed(objPath, props, fixes) {
 }
 
 
-reg([
+reg([ // Removes space characters at the end of some HTML paragraphs.
   '09a70a00f6719>dp-v-1',
   '09a70a00f6719>dp-vv-1-0',
-], propSed('.body.0', 'value', [/ (?=<\/p><p>(?:Wenn |Neben |\(3\)))/g]));
+], propSed('.body.0', 'value', [/ (?=<\/p>)/g]));
 
 reg([
   'Cd6tRIwaThmpMnetnDqJKQ>dp-cv-0-0',
