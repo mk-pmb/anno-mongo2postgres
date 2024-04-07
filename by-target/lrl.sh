@@ -19,7 +19,7 @@ function cli_main () {
       rm -- tmp.* || return $?
       ;;
     dis ) re_diss "$@";;
-    dis- ) re_diss_digi +cpg389+annotationen_test "$@";;
+    dis- ) re_diss_digi +cpg148+cpg389+annotationen_test "$@";;
     pg ) lrl_cda <tmp.dissect.all.json "$@";;
     pg1k ) lrl_cda <tmp.dissect.all.json limit=1e3 "$@";;
     re ) lrl_cda <tmp.undissect.json prgi=1 "$@";;
