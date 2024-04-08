@@ -23,7 +23,7 @@ const customUserURLs = {
 };
 const byLegacyName = {};
 const byUUID = {};
-let nonameCnt = 0;
+const namelessUsers = [];
 let as22currentUser;
 const as22usersYaml = {};
 const jsonTrailingNoComma = 'JSON git fix: No comma after this';
@@ -62,7 +62,10 @@ const EX = {
       '',
     ].join('\n'), 'UTF-8');
 
-    if (nonameCnt) { console.warn('W:', nonameCnt, 'unnamed users.'); }
+    if (namelessUsers.length) {
+      console.warn('W:', namelessUsers.length, 'users had no name:',
+        namelessUsers.join(', '));
+    }
   },
 
 
@@ -79,14 +82,17 @@ const EX = {
 
     const pop = mustPop(userSpec);
     EX.learnUserPub(agent, pop('undef | dictObj', 'public'));
-    if (!agent.name) {
-      agent.name = '???_NO_LEGACY_NAME_???';
-      nonameCnt += 1;
-    }
-    agent.type = EX.guessAgentType(agent);
     byUUID[uuid] = agent;
     byLegacyName[legacyUserName] = uuid;
-    console.debug([uuid, agent.type, agent.name].join('\t'));
+
+    const logLineParts = [uuid, agent.type, agent.name];
+    if (!agent.name) {
+      agent.name = '???_NO_LEGACY_NAME_???';
+      namelessUsers.push(legacyUserName);
+      logLineParts.push(legacyUserName);
+    }
+    agent.type = EX.guessAgentType(agent);
+    console.debug(logLineParts.join('\t'));
 
     as22currentUser = [
       'author_identities:',

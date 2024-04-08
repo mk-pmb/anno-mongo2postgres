@@ -67,6 +67,7 @@ function lrl_cda () {
 
   lrl9e9 ubhd/convertDissectedAnnos "$@" || return $?
 
+  echo -n 'Generating combined SQL files: '
   local DATA_FILES=( tmp.pg.anno_*.sql )
   concat_sql_files tmp.pg.anno_combo_reset.sql "$STRU" \
     "${DATA_FILES[@]}" || return $?
@@ -74,6 +75,7 @@ function lrl_cda () {
     "${DATA_FILES[@]}" || return $?
   rm -- tmp.pg.anno_*.sql.gz
   gzip tmp.pg.anno_*.sql || return $?
+  echo 'done.'
 }
 
 
