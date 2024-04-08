@@ -1,0 +1,8 @@
+﻿{
+  "admin":      ["author", "moderator", "publisher"],
+  "creator":    ["author"],
+  "moderator":  ["moderator"],
+  "write":      ["author"],
+
+  "": null
+}
