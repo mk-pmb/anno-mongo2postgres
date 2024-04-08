@@ -5,6 +5,7 @@ import equal from 'equal-pmb';
 import objMapValues from 'lodash.mapvalues';
 
 import fixAuthor from './fixAuthor.mjs';
+import rewriteAnnoBaseUrls from './rewriteAnnoBaseUrls.mjs';
 import rewriteReplyTo from './rewriteReplyTo.mjs';
 import ubFacts from './facts.mjs';
 
@@ -45,6 +46,8 @@ const EX = async function optimizeReviDetails(reviAnno, job) {
     console.warn('nonStandardTopLevelKey:', k, v);
     job.counters.add('nonStandardTopLevelKey:' + k + '=' + v);
   });
+
+  rewriteAnnoBaseUrls.inplace(data);
 };
 
 
