@@ -14,19 +14,21 @@ const { annoBaseUrl } = ubFacts;
 
 const EX = function rewriteReplyTo(anno) {
   const {
-    // meta,
+    divePath,
     data,
     relations,
   } = anno;
-  const origReplyTo = anno.api.popData('nonEmpty str | undef', 'replyTo');
-  // meta.debug_replyto = (origReplyTo || '');
-  if (!origReplyTo) { return; }
 
   const parentAnnoId = EX.findParentAnnoId(anno);
   const parentAnnoUrlRel = parentAnnoId;
   const parentAnnoUrlAbs = annoBaseUrl + 'anno/' + parentAnnoId;
 
-  namedEqual('original replyTo', origReplyTo, parentAnnoUrlAbs);
+  anno.api.popData([['oneOf', [
+    undefined,
+    parentAnnoUrlAbs,
+  ]]], 'replyTo');
+  if (!divePath.commentDepth) { return; }
+
   mustBe.prop(data, [['oneOf', [
     undefined,
     'replying',
@@ -40,7 +42,7 @@ const EX = function rewriteReplyTo(anno) {
     [].concat(data.target));
   mustBe('obj', 'original first target')(origTgt);
   const popTgt = objPop(origTgt, { mustBe }).mustBe;
-  const origScope = popTgt('nonEmpty str | undef', 'scope');
+  const origScope = popTgt('nonEmpty str', 'scope');
   namedEqual('original scope URL', origScope, relations.subject);
   const origTgtSel = popTgt('obj | undef', 'selector');
   if (origTgtSel) {
@@ -53,10 +55,15 @@ const EX = function rewriteReplyTo(anno) {
   popTgt.expectEmpty();
 
   delete data.purpose;
-  data.target = { id: parentAnnoUrlRel };
-  if (origScope) { data.target.scope = origScope; }
-  data['as:inReplyTo'] = parentAnnoUrlRel;
+  const updates = {
+    'as:inReplyTo': [parentAnnoUrlAbs],
+    target: [{ id: parentAnnoUrlAbs, scope: origScope }, origTgt],
+    motivation: ['replying'],
+  };
+  Object.assign(data, updates);
   relations.inReplyTo = parentAnnoUrlRel;
+  // console.debug(divePath.expectedContainerAnnoId, divePath.str,
+  //   'rel:', relations, 'upd:', updates);
 };
 
 

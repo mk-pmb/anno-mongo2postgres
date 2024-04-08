@@ -14,7 +14,6 @@ const { annoBaseUrl } = ubFacts;
 
 const EX = async function optimizeReviDetails(reviAnno, job) {
   await optimizeReviDetails.orig(reviAnno, job);
-  await rewriteReplyTo(reviAnno, job);
   const { data } = reviAnno;
 
   if (data.creator === 'wgd@DWork') {
@@ -27,6 +26,7 @@ const EX = async function optimizeReviDetails(reviAnno, job) {
     }
   }
   await fixAuthor(reviAnno, job);
+  await rewriteReplyTo(reviAnno, job);
 
   // const origData = { ...data };
   function omitKey(k) { delete data[k]; }
