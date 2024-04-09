@@ -18,6 +18,9 @@ const EX = async function optimizeReviDetails(reviAnno, job) {
   const { data } = reviAnno;
 
   if (data.creator === 'wgd@DWork') {
+    if ((data.canonical || '').startsWith('urn:wgd:')) {
+      delete data.canonical;
+    }
     let title = data['dc:title'];
     if (title) {
       if (title.startsWith('Bildzyklus ')) {

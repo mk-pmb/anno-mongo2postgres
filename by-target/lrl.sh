@@ -67,6 +67,16 @@ function lrl_cda () {
 
   lrl9e9 ubhd/convertDissectedAnnos "$@" || return $?
 
+  echo -n 'Checking SQL files for badwords: '
+  local BADWORDS='
+    s~("creator":\{"id":")urn(:uuid:)~\1<ok>\2~
+    s~.{0,40}urn:.{0,40}~\a&\f~g
+    '
+  BADWORDS="$(<tmp.pg.anno_data.sql sed -rf <(echo "$BADWORDS"
+    ) | grep -m 10 --color=always -noPe '\a[^\f]+')"
+  [ -z "$BADWORDS" ] || return 4$(echo E: "Found badwords: $BADWORDS" >&2)
+  echo 'ok.'
+
   echo -n 'Generating combined SQL files: '
   local DATA_FILES=( tmp.pg.anno_*.sql )
   concat_sql_files tmp.pg.anno_combo_reset.sql "$STRU" \
