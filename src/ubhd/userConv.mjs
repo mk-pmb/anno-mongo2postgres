@@ -105,7 +105,8 @@ const EX = {
     const aliases = [].concat(pop('undef | ary', 'alias')).filter(Boolean);
     if (aliases.length) {
       as22currentUser.push('', 'upstream_userid_aliases:');
-      aliases.forEach((al) => {
+      aliases.forEach(function addAlias(al) {
+        mustBe.nest('upstream user ID alias', al);
         byLegacyName[al] = uuid;
         as22currentUser.push('    - id: ' + JSON.stringify(al));
       });
