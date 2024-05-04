@@ -9,7 +9,6 @@ import guessSubjectTarget from '../guessSubjectTarget.mjs';
 import jsonDeepCopy from '../util/jsonDeepCopy.mjs';
 
 
-const namedEqual = equal.named.deepStrictEqual;
 const doNothing = Boolean;
 
 
@@ -27,10 +26,6 @@ function reorganizeCommonNonStandardTopLevelProps(recId, origData) {
   const anno = cloneAnno({ recId, data: origData });
   const { popData } = anno.api;
 
-  const unverifiedDoi = (popData('nonEmpty str | undef', 'doi') || null);
-  namedEqual('Expected no previous dc:*',
-    origData['dc:identifier'], undefined);
-
   popData('nonEmpty str', '_id');
   popData('undef', '_revisions');
   popData('undef', '_replies');
@@ -41,7 +36,6 @@ function reorganizeCommonNonStandardTopLevelProps(recId, origData) {
   anno.meta = {
     time_created: pgDumpWriter.timestampFromIsoFmt(origCreatedStr),
     author_local_userid: '',
-    unverifiedDoi,
   };
 
   return anno;

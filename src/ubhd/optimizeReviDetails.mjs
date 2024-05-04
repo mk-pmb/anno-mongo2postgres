@@ -16,6 +16,7 @@ const { annoBaseUrl } = ubFacts;
 const EX = async function optimizeReviDetails(reviAnno, job) {
   await optimizeReviDetails.orig(reviAnno, job);
   const { data } = reviAnno;
+  delete data.doi;
 
   if (data.creator === 'wgd@DWork') {
     if ((data.canonical || '').startsWith('urn:wgd:')) {

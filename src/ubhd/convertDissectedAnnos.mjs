@@ -1,15 +1,11 @@
 // -*- coding: utf-8, tab-width: 2 -*-
 
-import eq from 'equal-pmb';
 import objDive from 'objdive';
 
-import badDoisList from './badDois.json';
-import badDoisOptimizeReport from './badDois.optimizeReport.mjs';
 import cda from '../convertDissectedAnnos/index.mjs';
 import idFormats from './idFormats.mjs';
 import optimizeReviDetails from './optimizeReviDetails.mjs';
 import sharedHotfixes from './sharedHotfixes.mjs';
-import ubFacts from './facts.mjs';
 
 
 const job = cda.getJob();
@@ -21,16 +17,6 @@ const {
 job.reHook(optimizeReviDetails);
 sharedHotfixes.addSkips(job);
 Object.assign(job.idFormatRegExps, idFormats.extraRegExps);
-
-
-Object.assign(job, {
-  badDoiReportPrefix: ubFacts.digiDoi,
-
-  async optimizeTrafoReport(r) {
-    await badDoisOptimizeReport(r);
-  },
-
-});
 
 
 function reg(recIds, fix) {
@@ -80,21 +66,6 @@ reg([
 ], propSed('', 'via', [[/~\d+$/, '']]));
 
 
-
-function badDoi(mongoId, recIdSuffix, doiPrefix, badSuffix) {
-  function killDoi(anno) {
-    const { meta } = anno;
-    eq(meta.unverifiedDoi, doiPrefix + mongoId + badSuffix);
-    delete meta.unverifiedDoi;
-    job.counters.add('acknowledgedBadDoi');
-  }
-  hotfixes[mongoId + recIdSuffix] = killDoi;
-}
-
-badDoisList.filter(Boolean).forEach((item) => {
-  const [mongoId, reviIdx, wrongSuffix] = item;
-  badDoi(mongoId, '>dp-v-' + reviIdx, ubFacts.digiDoi, wrongSuffix);
-});
 
 
 

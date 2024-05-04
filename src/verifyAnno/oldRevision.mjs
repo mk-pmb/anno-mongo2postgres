@@ -4,14 +4,12 @@ import mustBe from 'typechecks-pmb/must-be.js';
 import vTry from 'vtry';
 
 import expectHasAllTheContentsFrom from './expectHasAllTheContentsFrom.mjs';
-import verifyOldReviDoi from './oldReviDoi.mjs';
 import verifyReviUrl from './reviUrl.mjs';
 
 
 const EX = function verifyOldRevision(how, origRevi, reviIdx) {
   const {
     expectedData,
-    expectedMeta,
     job,
   } = how;
   mustBe('obj', 'how.job')(job);
@@ -24,8 +22,7 @@ const EX = function verifyOldRevision(how, origRevi, reviIdx) {
     verifyReviUrl(revi, 'id', { reviNum });
     verifyReviUrl(revi, 'versionOf');
     verifyReviUrl(revi, 'via');
-    verifyOldReviDoi(expectedMeta.unverifiedDoi,
-      revi.meta.unverifiedDoi, reviNum, how);
+    delete revi.data.doi;
 
     const allSubRevis = popRevi('undef | ary', '_revisions');
     (allSubRevis || []).forEach(EX.bind(null, how));
