@@ -7,6 +7,8 @@ import idFormats from './idFormats.mjs';
 import optimizeReviDetails from './optimizeReviDetails.mjs';
 import sharedHotfixes from './sharedHotfixes.mjs';
 
+import knownDois from './tmp.versIdToDoiPart.json';
+
 
 const job = cda.getJob();
 const {
@@ -17,6 +19,13 @@ const {
 job.reHook(optimizeReviDetails);
 sharedHotfixes.addSkips(job);
 Object.assign(job.idFormatRegExps, idFormats.extraRegExps);
+job.knownDois = knownDois;
+delete knownDois[''];
+
+job.cliDone = async function cliDone() {
+  Object.values(job.knownDois).sort().forEach(
+    doi => job.assume('doiUsed:' + doi));
+};
 
 
 function reg(recIds, fix) {

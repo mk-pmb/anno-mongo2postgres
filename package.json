@@ -19,6 +19,7 @@
   "scripts": {
     "lint": "eslint --ext=js,mjs . && echo +OK eslint succeeded.",
     "lrl": "cd by-target && ./lrl.sh \"$@\"",
+    "doiex": "cd src/ubhd && nodemjs datacite_dois_extract.mjs",
     "users": "cd src/ubhd && nodemjs userConv.mjs 2>&1 | tee -- tmp.userConv.log",
     "sh": "\"$@\""
   },
@@ -36,11 +37,12 @@
     "is-string": "^1.0.7",
     "lodash.mapvalues": "^4.6.0",
     "nodemjs": "^0.1.14",
-    "nofs": "^0.12.2",
-    "objdive": "^0.1.3",
+    "nofs": "^0.12.3",
+    "objdive": "^0.1.4",
     "objpop": "^0.3.3",
     "p-each-series": "^2.2.0",
     "p-fatal": "^0.1.5",
+    "p-props": "^4.0.0",
     "postgres-dump-writer-helpers-220524-pmb": "^0.1.9",
     "read-data-file": "^2.0.11",
     "read-relaxed-json-from-stdin-pmb": "^1.0.1",

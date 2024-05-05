@@ -3,10 +3,11 @@
 import 'p-fatal';
 import 'usnam-pmb';
 
-import fs from 'fs';
 import mustBe from 'typechecks-pmb/must-be.js';
+import pProps from 'p-props';
+import promisingFs from 'fs/promises';
 
-import ubFacts from '../facts.mjs';
+import ubFacts from './facts.mjs';
 
 
 const oldBaseUrl = 'https://anno.ub.uni-heidelberg.de/anno/anno/';
@@ -14,7 +15,8 @@ const oldBaseUrl = 'https://anno.ub.uni-heidelberg.de/anno/anno/';
 function toJson(x) { return JSON.stringify(x, null, 1).replace(/\n */g, ' '); }
 
 async function runFromCLI() {
-  const allDoisData = (await import('./dc-export-all.json')).default.data;
+  const srcJson = './tmp.datacite_dois_all.json';
+  const allDoisData = (await import(srcJson)).default.data;
   const sortedLists = {
     lineageIds: new Set(),
     redirTargetIdParts: new Set(),
@@ -60,19 +62,21 @@ async function runFromCLI() {
     sortedLists.redirTargetIdParts.add(redirUrlIdPart);
   });
 
-  Object.entries(jsonReports).forEach(([dest, data]) => {
+  await pProps(jsonReports, async (data, dest) => {
     let t = '\uFEFF{\n';
     Object.keys(data).sort().forEach((k) => {
       t += toJson(k) + ': ' + toJson(data[k]) + ',\n';
     });
     t += '"": null }\n';
-    fs.writeFile('tmp.' + dest + '.json', t, 'UTF-8', Boolean);
+    await promisingFs.writeFile('tmp.' + dest + '.json', t, 'UTF-8');
   });
 
-  Object.entries(sortedLists).forEach(([dest, list]) => {
+  await pProps(sortedLists, async (list, dest) => {
     const t = Array.from(list.values()).sort().join('\n') + '\n';
-    fs.writeFile('tmp.' + dest + '.txt', t, 'UTF-8', Boolean);
+    await promisingFs.writeFile('tmp.' + dest + '.txt', t, 'UTF-8');
   });
+
+  console.info('+OK Success.');
 }
 
 

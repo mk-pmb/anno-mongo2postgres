@@ -10,13 +10,24 @@ import rewriteReplyTo from './rewriteReplyTo.mjs';
 import ubFacts from './facts.mjs';
 
 const namedEqual = equal.named.deepStrictEqual;
-const { annoBaseUrl } = ubFacts;
+const digiDoiBaseUrl = 'https://doi.org/' + ubFacts.digiDoi;
 
 
 const EX = async function optimizeReviDetails(reviAnno, job) {
   await optimizeReviDetails.orig(reviAnno, job);
-  const { data } = reviAnno;
+  const { data, divePath } = reviAnno;
   delete data.doi;
+  namedEqual('versionIndices.length', divePath.versionIndices.length, 1);
+  const versId = (divePath.expectedContainerAnnoId + '~'
+    + (divePath.versionIndices[0] + 1));
+  const hasDoi = job.knownDois[versId];
+  if (hasDoi) {
+    data['dc:identifier'] = digiDoiBaseUrl + hasDoi;
+    // eslint-disable-next-line no-param-reassign
+    delete job.knownDois[divePath.expectedContainerAnnoId];
+    // eslint-disable-next-line no-param-reassign
+    delete job.knownDois[versId];
+  }
 
   if (data.creator === 'wgd@DWork') {
     if ((data.canonical || '').startsWith('urn:wgd:')) {
@@ -43,7 +54,7 @@ const EX = async function optimizeReviDetails(reviAnno, job) {
 
     if ((k === 'via') || (k === 'versionOf')) {
       const caid = reviAnno.divePath.expectedContainerAnnoId;
-      namedEqual('attribute ' + k, v, (annoBaseUrl + 'anno/' + caid));
+      namedEqual('attribute ' + k, v, (ubFacts.annoBaseUrl + 'anno/' + caid));
       return;
     }
 
