@@ -18,6 +18,7 @@ function cli_main () {
       clear_cache || return $?
       rm -- tmp.* || return $?
       ;;
+    cbw ) lrl_check_badwords "$@";;
     dis ) re_diss "$@";;
     dis- ) re_diss_digi +cpg148+cpg389+annotationen_test "$@";;
     dis-wg ) re_diss_digi +cpg389 "$@";;
@@ -66,16 +67,7 @@ function lrl_cda () {
     || echo "W: Found no 'CREATE TABLE' in $STRU!" >&2
 
   lrl9e9 ubhd/convertDissectedAnnos "$@" || return $?
-
-  echo -n 'Checking SQL files for badwords: '
-  local BADWORDS='
-    s~("creator":\{"id":")urn(:uuid:)~\1<ok>\2~
-    s~.{0,40}urn:.{0,40}~\a&\f~g
-    '
-  BADWORDS="$(<tmp.pg.anno_data.sql sed -rf <(echo "$BADWORDS"
-    ) | grep -m 10 --color=always -noPe '\a[^\f]+')"
-  [ -z "$BADWORDS" ] || return 4$(echo E: "Found badwords: $BADWORDS" >&2)
-  echo 'ok.'
+  lrl_check_badwords || return $?
 
   echo -n 'Generating combined SQL files: '
   local DATA_FILES=( tmp.pg.anno_*.sql )
@@ -105,6 +97,19 @@ function concat_sql_files () {
     '-- pgAdminer needs a statement (i.e. not comment) at end of file:' \
     "SELECT TO_CHAR(NOW(), 'YYYY-MM-DD HH24:MI:SS')"' AS "success";' \
     >>"$DEST" || return $?
+}
+
+
+function lrl_check_badwords () {
+  echo -n 'Checking SQL files for badwords: '
+  local BADWORDS='
+    s~("creator":\{"id":")urn(:uuid:)~\1<ok>\2~
+    s~.{0,40}urn:.{0,40}~\a&\f~g
+    '
+  BADWORDS="$(<tmp.pg.anno_data.sql sed -rf <(echo "$BADWORDS"
+    ) | grep -m 10 --color=always -noPe '\a[^\f]+')"
+  [ -z "$BADWORDS" ] || return 4$(echo E: "Found badwords: $BADWORDS" >&2)
+  echo 'ok.'
 }
 
 
