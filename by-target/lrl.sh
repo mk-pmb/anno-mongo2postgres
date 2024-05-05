@@ -104,6 +104,8 @@ function lrl_check_badwords () {
   echo -n 'Checking SQL files for badwords: '
   local BADWORDS='
     s~("creator":\{"id":")urn(:uuid:)~\1<ok>\2~
+    s~["/](citations|passages|scholia)/urn:cts:greekLit:tlg~<ok>~g
+    s~https://nbn-resolving\.de/urn:nbn:~<ok>~g
     s~.{0,40}urn:.{0,40}~\a&\f~g
     '
   BADWORDS="$(<tmp.pg.anno_data.sql sed -rf <(echo "$BADWORDS"
