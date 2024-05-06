@@ -83,6 +83,10 @@ Annotationen umwandeln
     * Wichtig in der Zusammenfassung am Ende: gleiches wie oben
       * Wenn bei `unconfirmedAssumptions` einige Einträge `doiUsed:…`
         sind, fehlen im Dump Annotationen, die eine DOI haben.
+    * Um das Ausmaß von eventuell auftretenden Fehlern abzuschätzen, füge man
+      vor `npm` noch `TRAFO_MAXERR=1000` ein. Der Konverter versucht dann,
+      trotz Fehlern irgendwie weiterzumachen. Am Unterschied `TRAFO_MAXERR`
+      minus `remainMaxErr` sieht man dann deren Anzahl.
 1.  Falls du Dienste anhalten musstest wegen zu wenig RAM, starte sie wieder.
 
 

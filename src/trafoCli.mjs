@@ -115,7 +115,9 @@ trafoCli.core = async function trafoCliCore(coreArgs) {
     logFunc: console.error,
   });
   const nSliced = data.length;
-  const maxErr = Math.max((+cliOpt.maxerr || 0), 0) || 1;
+  const maxErr = Math.max((+cliOpt.maxerr
+    || +process.env.TRAFO_MAXERR
+    || 0), 0) || 1;
   const progressInterval = (+cliOpt.prgi || 1e3);
   let remainMaxErr = maxErr;
   const { eachToplevelRecord } = job;
