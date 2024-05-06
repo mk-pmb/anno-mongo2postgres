@@ -36,7 +36,7 @@
     "getown": "^1.0.0",
     "is-string": "^1.0.7",
     "lodash.mapvalues": "^4.6.0",
-    "nodemjs": "^0.1.14",
+    "nodemjs": "^0.1.15",
     "nofs": "^0.12.3",
     "objdive": "^0.1.4",
     "objpop": "^0.3.3",
