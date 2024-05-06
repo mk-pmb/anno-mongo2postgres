@@ -20,10 +20,24 @@ Alles als Benutzer `annosrv`:
 1.  `cd -- $REPO`
 1.  `npm install .`
 1.  Im Unterverzeichnis `src/ubhd/`:
+    1.  Prüfe/bearbeite DataCite-Server und DOI-Präfix in `facts.mjs`.
     1.  Lade alle bestehenden Anno-DOIs runter: `./datacite_dois_download.sh`
     1.  Prüfe die runtergeladene Datei (Name wird angezeigt) auf Plausibilität.
         Wenn gut, benenne sie auf `tmp.datacite_dois_all.json` um.
     1.  `npm run doiex`
+
+
+
+DataCite DOI URLs updaten
+-------------------------
+
+1.  `./src/ubhd/datacite_dois_update_urls.sh`
+1.  Lies und prüfe die Missionsvorschau.
+1.  Stelle sicher, dass die Shell lange genug überlebt (Zeitvorschau sollte
+    dagestanden haben) – im Fall von SSH könnte `screen` o.ä. nötig sein.
+1.  Wenn Anpassungen nötig sind, brich ab (Strg+C),
+    setze genannte Umgebungsvariablen, wiederhole.
+1.  Wenn die Mission so passt, gib den DataCite-Login ein.
 
 
 
