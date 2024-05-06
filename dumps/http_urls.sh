@@ -78,7 +78,12 @@ function cli_report () {
     | sed -re 's~^https://\S+~<run upgrader on dump!>~' \
     | LANG=C sort --version-sort | uniq --count \
     | sort --version-sort >"$UNK"
-  less -S -- "$UNK"
+
+  if [ -s "$UNK" ]; then
+    less -S -- "$UNK"
+  else
+    echo D: "$UNK is empty => looking good!"
+  fi
 }
 
 
