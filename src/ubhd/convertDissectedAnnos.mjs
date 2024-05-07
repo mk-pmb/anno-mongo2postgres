@@ -22,6 +22,22 @@ Object.assign(job.idFormatRegExps, idFormats.extraRegExps);
 job.knownDois = knownDois;
 delete knownDois[''];
 
+const ignoreDoiAnnos = [
+  '212d7693319d4',
+  'b4ddd7677eef6',
+  'BNgAWVT6Tlm034vtaHNl-Q',
+  'FSnSLh8FQMGbqzdmKgb37g',
+  'RAoXN3O5RSa1eIDo9np1DA',
+];
+ignoreDoiAnnos.forEach(function del(mongoId) {
+  delete knownDois[mongoId];
+  for (let revi = 1; revi < 8; revi += 1) {
+    delete knownDois[mongoId + '_' + revi];
+    delete knownDois[mongoId + '~' + revi];
+  }
+});
+
+
 job.cliDone = async function cliDone() {
   Object.values(job.knownDois).sort().forEach(
     doi => job.assume('doiUsed:' + doi));

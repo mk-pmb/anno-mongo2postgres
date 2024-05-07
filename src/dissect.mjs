@@ -113,6 +113,23 @@ const jobSpec = {
     }());
   },
 
+
+  tlrLogSkip(why, hookCtx, details) {
+    const { job, mongoId, anno, origSaveDir } = hookCtx;
+    let saveDir = origSaveDir;
+    if (details) {
+      if (details.saveDir !== undefined) {
+        saveDir += ' -> ' + (String(details.saveDir) || '<empty>');
+      }
+    }
+    const { doi } = anno;
+    if (doi) {
+      job.hint('skipDoiAnno:' + mongoId, { why, saveDir, doi });
+      // console.warn('Skip:', mongoId, why, saveDir, { doi });
+    }
+  },
+
+
   async eachToplevelRecord(anno, mongoId, job) {
     mustBe.nest('Mongo ID', mongoId);
     job.hopefullyUnique.add('mongoId:' + mongoId);
@@ -122,13 +139,17 @@ const jobSpec = {
     revHost = job.rewriteRevHost(revHost);
     if (!revHost) { return; }
 
-    let saveDir = [
+    const origSaveDir = [
       revHost + (tgt.port ? '_' + tgt.port : ''),
       ...tgt.pathParts.slice(0, -1),
     ].join('/');
-    saveDir = job.rewriteSaveDir(saveDir);
-    if (!job.onlySaveDirs(saveDir)) { return; }
-    if (!saveDir) { return; }
+    let saveDir = origSaveDir;
+    const hookCtx = { job, mongoId, anno, origSaveDir };
+    saveDir = job.rewriteSaveDir(saveDir, hookCtx);
+    if (!saveDir) { return job.tlrLogSkip('rewriteSaveDir', hookCtx); }
+    if (!job.onlySaveDirs(saveDir, hookCtx)) {
+      return job.tlrLogSkip('onlySaveDirs', hookCtx, { saveDir });
+    }
 
     const complexity = rateAnnoDepthComplexity(anno);
     job.counters.add('tlr:' + complexity);
