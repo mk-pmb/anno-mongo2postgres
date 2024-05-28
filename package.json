@@ -20,6 +20,7 @@
     "lint": "eslint --ext=js,mjs . && echo +OK eslint succeeded.",
     "lrl": "cd by-target && ./lrl.sh \"$@\"",
     "doiex": "cd src/ubhd && nodemjs datacite_dois_extract.mjs",
+    "pu": "./src/progressive_update.sh \"$@\"",
     "users": "cd src/ubhd && nodemjs userConv.mjs 2>&1 | tee -- tmp.userConv.log",
     "sh": "\"$@\""
   },

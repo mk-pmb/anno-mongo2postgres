@@ -41,6 +41,18 @@ DataCite DOI URLs updaten
 
 
 
+
+Konvertierungsgesamtkombination
+-------------------------------
+
+Um alle Konvertierungen nacheinander auszuführen – in der Hoffnung,
+dass die Eingabedateien fehlerfrei sind – führe man im `dumps/`-Ordner
+als sudo-berechtiger Benutzer `./convert_latest.sh` aus.
+
+Falls `REWRITE_BASEURL` (siehe unten) nötig ist, `export`iere das per Shell.
+
+
+
 Benutzer konvertieren
 ---------------------
 
@@ -83,11 +95,26 @@ Annotationen umwandeln
     * Wichtig in der Zusammenfassung am Ende: gleiches wie oben
       * Wenn bei `unconfirmedAssumptions` einige Einträge `doiUsed:…`
         sind, fehlen im Dump Annotationen, die eine DOI haben.
-    * Um das Ausmaß von eventuell auftretenden Fehlern abzuschätzen, füge man
+    * Sollte nicht mehr nötig sein. &rarr;
+      Um das Ausmaß von eventuell auftretenden Fehlern abzuschätzen, füge man
       vor `npm` noch `TRAFO_MAXERR=1000` ein. Der Konverter versucht dann,
       trotz Fehlern irgendwie weiterzumachen. Am Unterschied `TRAFO_MAXERR`
       minus `remainMaxErr` sieht man dann deren Anzahl.
 1.  Falls du Dienste anhalten musstest wegen zu wenig RAM, starte sie wieder.
+1.  Für schrittweise Synchronisierung:
+    `sudo -u annosrv npm run pu`
+    * Verschiebt die Ergebnisdateien nach `tmp.pu/$DATUM`,
+      aktualisiert die Symlinks `tmp.pu/{crnt,prev}`,
+      und wenn bereits ein voriger Speicherstand vorlag,
+      erzeugt es auch eine SQL-Datei mit den Updates.
+
+
+
+
+
+
+
+
 
 
 

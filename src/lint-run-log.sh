@@ -14,7 +14,7 @@ function lint_and_run () {
   [[ "$MJS" == /* ]] || MJS="$SELFPATH/$MJS"
   [ -f "$MJS" ] || return 4$(echo "E: no such file: $MJS" >&2)
 
-  just_lint >&2 || return $?
+  [ -n "$SKIP_LINT" ] || just_lint >&2 || return $?
 
 
   local TMP_BFN="$SELFPATH/tmp.${BFN//\//.}"
