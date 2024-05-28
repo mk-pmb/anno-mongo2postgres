@@ -71,13 +71,13 @@ function lrl_cda () {
   lrl_check_badwords || return $?
 
   echo -n 'Generating combined SQL files: '
-  local DATA_FILES=( tmp.pg.anno_*.sql )
-  concat_sql_files tmp.pg.anno_combo_reset.sql "$STRU" \
+  local DATA_FILES=( tmp.pg.*.sql )
+  concat_sql_files tmp.pg.combo_reset.sql "$STRU" \
     "${DATA_FILES[@]}" || return $?
-  concat_sql_files tmp.pg.anno_combo_add.sql \
+  concat_sql_files tmp.pg.combo_add.sql \
     "${DATA_FILES[@]}" || return $?
-  rm -- tmp.pg.anno_*.sql.gz
-  gzip tmp.pg.anno_*.sql || return $?
+  rm -- tmp.pg.*.sql.gz
+  gzip tmp.pg.*.sql || return $?
   echo 'done.'
 }
 
