@@ -2,6 +2,7 @@
 
 export default {
   annoBaseUrl: 'https://anno.ub.uni-heidelberg.de/anno/',
+  // ^-- bezieht sich auf die im Mongo Dump verwendeten originalen URLs
 
   // dataCiteApiHost: 'api.test.datacite.org',
   // digiDoi: '10.82109/anno.test.',

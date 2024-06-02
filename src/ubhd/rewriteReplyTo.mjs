@@ -33,10 +33,6 @@ const EX = function rewriteReplyTo(anno) {
     undefined,
     'replying',
   ]]], 'purpose');
-  mustBe.tProp('body', data.body, [['oneOf', [
-    undefined,
-    'replying',
-  ]]], 'motivation');
 
   const [origTgt] = mustBe('ary ofLength:1', 'original targets list')(
     [].concat(data.target));

@@ -25,6 +25,8 @@ Alles als Benutzer `annosrv`:
     1.  Prüfe die runtergeladene Datei (Name wird angezeigt) auf Plausibilität.
         Wenn gut, benenne sie auf `tmp.datacite_dois_all.json` um.
     1.  `npm run doiex`
+        * Generiert außerdem `tmp.versep_exceptions.rc`, die (ohne das vordere
+          `tmp.`) als DoiBot-Config gedacht ist.
 
 
 

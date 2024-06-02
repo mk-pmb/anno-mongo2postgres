@@ -14,17 +14,26 @@ const oldBaseUrl = 'https://anno.ub.uni-heidelberg.de/anno/anno/';
 
 function toJson(x) { return JSON.stringify(x, null, 1).replace(/\n */g, ' '); }
 
+
+function splitDoiVerSep(doiVersIdPart) {
+  return doiVersIdPart.split(/([_~])(?=\d+$)/).concat('', '').slice(0, 3);
+}
+
+
 async function runFromCLI() {
   const srcJson = './tmp.datacite_dois_all.json';
   const allDoisData = (await import(srcJson)).default.data;
   const sortedLists = {
+    doibotVersepExceptions: new Set(),
     lineageIds: new Set(),
     redirTargetIdParts: new Set(),
+    doiVerSepUsage: new Set(),
   };
   const jsonReports = {
     versIdToDoiPart: {},
     doiPartToVersId: {},
   };
+  const doiVerSepCounters = { '': 0, '_': 0, '~': 0 };
   allDoisData.forEach((rec) => {
     const attr = rec.attributes;
     const {
@@ -53,13 +62,38 @@ async function runFromCLI() {
     const redirUrlIdPart = url.split(oldBaseUrl)[1];
     jsonReports.versIdToDoiPart[redirUrlIdPart] = lcDoiAnnoVersId;
     jsonReports.doiPartToVersId[lcDoiAnnoVersId] = redirUrlIdPart;
+
+    const [lcBaseId, doiVerSep, verNum] = splitDoiVerSep(lcDoiAnnoVersId);
+    doiVerSepCounters[doiVerSep] += 1;
+
+    if (doiVerSep) {
+      sortedLists.doiVerSepUsage.add([
+        attr.created,
+        doiVerSep,
+        lcDoiAnnoVersId,
+      ].join('\t'));
+    }
+    if (doiVerSep === '~') {
+      sortedLists.doibotVersepExceptions.add('  /' + lcBaseId + '/~');
+    }
+
     const lcRedirUrlIdPart = redirUrlIdPart.toLowerCase();
     if (lcRedirUrlIdPart !== lcDoiAnnoVersId) {
       const lcLowlineId = lcRedirUrlIdPart.replace(/\~(?=\d+$)/, '_');
       mustBe.eeq(lcLowlineId, 'low-line redirect')(lcDoiAnnoVersId);
     }
-    sortedLists.lineageIds.add(redirUrlIdPart.replace(/[~_]\d+$/, ''));
+    const lineageId = redirUrlIdPart.replace(/[~_]\d+$/, '');
+    sortedLists.lineageIds.add(lineageId);
     sortedLists.redirTargetIdParts.add(redirUrlIdPart);
+  });
+
+  Object.assign(sortedLists.doibotVersepExceptions, {
+    saveFn: 'tmp.versep_exceptions.rc',
+    decorate(v) {
+      const k = 'anno_url_versep_exceptions';
+      if (!v.length) { throw new Error('Empty list for ' + k); }
+      return ['CFG[' + k + "]='", ...v, "  '"];
+    },
   });
 
   await pProps(jsonReports, async (data, dest) => {
@@ -72,10 +106,14 @@ async function runFromCLI() {
   });
 
   await pProps(sortedLists, async (list, dest) => {
-    const t = Array.from(list.values()).sort().join('\n') + '\n';
-    await promisingFs.writeFile('tmp.' + dest + '.txt', t, 'UTF-8');
+    let v = Array.from(list.values()).sort();
+    if (list.decorate) { v = list.decorate(v); }
+    const t = v.join('\n') + '\n';
+    const s = (list.saveFn || ('tmp.' + dest + '.txt'));
+    await promisingFs.writeFile(s, t, 'UTF-8');
   });
 
+  console.debug('D: doiVerSepCounters:', doiVerSepCounters);
   console.info('+OK Success.');
 }
 
