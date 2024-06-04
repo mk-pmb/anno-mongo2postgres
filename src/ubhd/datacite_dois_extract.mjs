@@ -86,6 +86,7 @@ async function runFromCLI() {
     }
     if (doiVerSep === '~') {
       sortedLists.doibotVersepExceptions.add('  /' + lcBaseId + '/~');
+      // writeShallowSortedJsonObj('attr.' + lcDoiAnnoVersId + '.json', attr);
     }
 
     const lcRedirUrlIdPart = redirUrlIdPart.toLowerCase();
