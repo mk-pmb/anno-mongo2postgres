@@ -80,6 +80,7 @@ async function runFromCLI() {
       sortedLists.doiVerSepUsage.add([
         attr.created,
         doiVerSep,
+        verNum,
         lcDoiAnnoVersId,
       ].join('\t'));
     }
