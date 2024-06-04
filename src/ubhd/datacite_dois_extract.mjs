@@ -20,6 +20,16 @@ function splitDoiVerSep(doiVersIdPart) {
 }
 
 
+async function writeShallowSortedJsonObj(dest, data) {
+  let t = '\uFEFF{\n';
+  Object.keys(data).sort().forEach((k) => {
+    t += toJson(k) + ': ' + toJson(data[k]) + ',\n';
+  });
+  t += '"": null }\n';
+  await promisingFs.writeFile(dest, t, 'UTF-8');
+}
+
+
 async function runFromCLI() {
   const srcJson = './tmp.datacite_dois_all.json';
   const allDoisData = (await import(srcJson)).default.data;
@@ -96,14 +106,8 @@ async function runFromCLI() {
     },
   });
 
-  await pProps(jsonReports, async (data, dest) => {
-    let t = '\uFEFF{\n';
-    Object.keys(data).sort().forEach((k) => {
-      t += toJson(k) + ': ' + toJson(data[k]) + ',\n';
-    });
-    t += '"": null }\n';
-    await promisingFs.writeFile('tmp.' + dest + '.json', t, 'UTF-8');
-  });
+  await pProps(jsonReports,
+    (data, dest) => writeShallowSortedJsonObj('tmp.' + dest + '.json', data));
 
   await pProps(sortedLists, async (list, dest) => {
     let v = Array.from(list.values()).sort();
