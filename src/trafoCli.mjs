@@ -169,10 +169,14 @@ trafoCli.core = async function trafoCliCore(coreArgs) {
     durationMsec,
     ...report,
   });
-  console.error('Done.', {
-    durationMinutes: durationMsec / 60e3,
-    ...report,
-  });
+  (function printReport() {
+    let r = 'Done. ' + JSON.stringify({
+      durationMinutes: durationMsec / 60e3,
+      ...report,
+    }, null, 2);
+    r = r.replace(/\[\n +(["\w][ -\uFFFF]*)\n +\]/g, '$1');
+    console.error(r);
+  }());
 
   if (job.firstErrMsg) { console.error('First error was:', job.firstErrMsg); }
   await (job.cliCleanup || doNothing)(job);
