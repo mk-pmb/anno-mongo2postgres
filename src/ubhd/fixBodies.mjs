@@ -142,7 +142,7 @@ function guessLinkingBodyValueFromSource(s, v) {
 
 const EX = function fixBodies(versId, origBodies, job) {
   let bodies = arrayOfTruths(origBodies);
-  bodies.map(function foundBody(origBody, idx) {
+  bodies = bodies.map(function foundBody(origBody, idx) {
     const trace = versId + '#' + idx;
     const traceUrl = 'anno://' + versId + '#body[' + idx + ']';
     const body = objMapValues(origBody, fixStr);
@@ -169,6 +169,7 @@ const EX = function fixBodies(versId, origBodies, job) {
 
     const bt = mustBe.tProp('body#' + idx, body, [['oneOf', [
       undefined,
+      'SpecificResource',
       'TextualBody',
     ]]], 'type');
     const p = mustBe.tProp('body#' + idx, body, [['oneOf', [
@@ -184,6 +185,13 @@ const EX = function fixBodies(versId, origBodies, job) {
     if (body.value === 'libellus augustalis') {
       body.value = body.value.replace(/\w+/g, uc1st);
     }
+
+    function fixedIt(goodBody) {
+      job.counters.add('autofixedBodyType');
+      // console.log('fixed:', trace, p, bk, goodBody);
+      return goodBody;
+    }
+
 
     function sourceMissing() {
       const d = job.hint(p + 'BodyValueWithoutSource', undefined, {});
@@ -215,24 +223,22 @@ const EX = function fixBodies(versId, origBodies, job) {
 
       if (bk === 'predicate,value') {
         // sourceMissing();
-        job.counters.add('autofixedBodyType');
         mustBe.nest(trace + ' sourceMissing value', body.value);
-        return {
+        return fixedIt({
           type: 'TextualBody',
           purpose: p,
           'rdf:predicate': body.predicate,
           value: body.value,
-        };
+        });
       }
       if ((bk === 'predicate,source,value') || (bk === 'predicate,source')) {
-        job.counters.add('autofixedBodyType');
-        return {
+        return fixedIt({
           type: 'SpecificResource',
           purpose: p,
           'rdf:predicate': body.predicate,
           ...(body.value && { 'dc:title': body.value }),
           source: body.source,
-        };
+        });
       }
     }
 
@@ -251,19 +257,19 @@ const EX = function fixBodies(versId, origBodies, job) {
         }
       }
       if (bk === 'source,value') {
-        job.counters.add('autofixedBodyType');
-        return {
+        return fixedIt({
           type: 'SpecificResource',
           purpose: p,
           'dc:title': body.value,
           source: body.source,
-        };
+        });
       }
       if (bk === 'value') { sourceMissing(); }
     }
 
     if (bt) {
       job.counters.add('validBodyType');
+      // console.debug('valid:', body);
       return body;
     }
 
@@ -281,6 +287,7 @@ const EX = function fixBodies(versId, origBodies, job) {
     // job.assume('hasActualBody:' + versId);
     job.counters.add('noActualBody');
   }
+  if (bodies.length === 1) { return bodies[0]; }
   return bodies;
 };
 

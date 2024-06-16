@@ -17,6 +17,8 @@ const EX = async function optimizeReviDetails(reviAnno, job) {
   await optimizeReviDetails.orig(reviAnno, job);
   const { data, divePath } = reviAnno;
   delete data.doi;
+  if (!data.type) { data.type = 'Annotation'; }
+  if (data.type.length === 1) { data.type = String(data.type); }
   namedEqual('versionIndices.length', divePath.versionIndices.length, 1);
   const versId = (divePath.expectedContainerAnnoId + '~'
     + (divePath.versionIndices[0] + 1));
