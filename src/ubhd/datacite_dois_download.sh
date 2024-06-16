@@ -9,10 +9,14 @@ function datacite_dois_download () {
   eval local -A FACTS=( $(
     sed -nre 's~,$~~;s~^\s*([A-Za-z]+): ~[\1]=~p' -- facts.mjs) )
   local URL="https://${FACTS[dataCiteApiHost]}/dois"$(
-    )"?page[size]=9009009&query=id:${FACTS[digiDoi]}*"
-  local DEST="tmp.$FUNCNAME.$$.json"
-  echo -n "$DEST <-"
-  wget --output-document="$DEST" -- "$URL"
+    )"?page[size]=9009009&query=id:${FACTS[digiDoi]}"
+  local IDX=0 SUF= DEST=
+  [ "$#" -ge 1 ] || set -- ''
+  for SUF in "$@"; do
+    DEST="tmp.$FUNCNAME.$$.$IDX.json"
+    echo -n "$DEST <"
+    wget --output-document="$DEST" -- "$URL$SUF*"
+  done
 }
 
 
