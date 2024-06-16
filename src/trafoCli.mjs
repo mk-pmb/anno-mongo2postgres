@@ -38,7 +38,8 @@ const jobApi = {
     return a;
   },
 
-  hint(k, v, w) {
+  hint(k, v, w) { // key, value, weakValue
+    // To start a dictionary: job.hint(dictName, undefined, {}).entry = val;
     const o = this.hints[k];
     if (v !== undefined) {
       this.hints[k] = v;

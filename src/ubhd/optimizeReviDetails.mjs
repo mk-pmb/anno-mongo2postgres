@@ -1,11 +1,10 @@
 // -*- coding: utf-8, tab-width: 2 -*-
 
-import arrayOfTruths from 'array-of-truths';
 import equal from 'equal-pmb';
-import mustBe from 'typechecks-pmb/must-be.js';
 import objMapValues from 'lodash.mapvalues';
 
 import fixAuthor from './fixAuthor.mjs';
+import fixBodies from './fixBodies.mjs';
 import rewriteAnnoBaseUrls from './rewriteAnnoBaseUrls.mjs';
 import rewriteReplyTo from './rewriteReplyTo.mjs';
 import ubFacts from './facts.mjs';
@@ -49,32 +48,7 @@ const EX = async function optimizeReviDetails(reviAnno, job) {
   function omitKey(k) { delete data[k]; }
   EX.computableTopLevelKeys.forEach(omitKey);
 
-  data.body = arrayOfTruths(data.body).map(function foundBody(body, idx) {
-    const bk = Object.keys(body).sort().join(' ');
-    if (bk === 'purpose') {
-      if (versId === 'auycPggXTAiTI7EtCUus4w~2') { return; }
-    }
-    const bt = mustBe.tProp('body#' + idx, body, [['oneOf', [
-      undefined,
-      'TextualBody',
-    ]]], 'type');
-    const p = mustBe.tProp('body#' + idx, body, [['oneOf', [
-      undefined,
-      'classifying',
-      'linking',
-    ]]], 'purpose');
-    if (!bt) {
-      // job.assume('validBodyType:' + versId, { k: bk, purpose: p });
-      job.counters.add('invalidBodyTypeForPurpose:' + p + ' keys: ' + bk);
-      job.counters.add('invalidBodyType');
-    }
-    return body;
-  });
-  data.body = arrayOfTruths(data.body);
-  if (!data.body.length) {
-    // job.assume('hasActualBody:' + versId);
-    job.counters.add('noActualBody');
-  }
+  data.body = fixBodies(versId, data.body, job);
 
   objMapValues(data, function checkTopLevelKey(v, k) {
     if (EX.standardTopLevelKeys.includes(k)) { return; }
