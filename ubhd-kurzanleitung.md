@@ -27,6 +27,9 @@ Alles als Benutzer `annosrv`:
     1.  `npm run doiex`
         * Generiert außerdem `tmp.versep_exceptions.rc`, die (ohne das vordere
           `tmp.`) als DoiBot-Config gedacht ist.
+        * Deren Einträge sollten in unserem Fall "rein zufällig" alle schon
+          in der DOI-Bot-Standard-Config stehen.
+          Prüfen; die rc-Datei sollte damit überflüssig sein.
 
 
 
