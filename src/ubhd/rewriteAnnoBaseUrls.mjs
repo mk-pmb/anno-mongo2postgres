@@ -6,10 +6,9 @@ import ubFacts from './facts.mjs';
 
 const { annoBaseUrl } = ubFacts;
 
-const rewriteBaseUrlTo = (process.env.REWRITE_BASEURL
+const rewriteBaseUrlTo = (new URL((process.env.REWRITE_BASEURL
   || 'http://localhost:33321/anno/'
-  // || 'https://anno.ub.uni-heidelberg.de/'
-);
+), annoBaseUrl)).href;
 
 
 const EX = function rewriteAnnoBaseUrls(anno) {

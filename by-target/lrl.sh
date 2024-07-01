@@ -13,6 +13,11 @@ function cli_main () {
   ulimit -v $(( $MAX_MEM_MB * 1024 ))
   export NODEJS_HEAP_MAX_MB="$MAX_MEM_MB"
 
+  while [ -n "$1" ]; do case "$1" in
+    a-t ) export REWRITE_BASEURL='../anno-test/'; shift;;
+    * ) break;
+  esac; done
+
   local TASK="$1"; shift
   case "$TASK" in
     clean )
