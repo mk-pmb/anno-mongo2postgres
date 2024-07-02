@@ -7,7 +7,6 @@ sudo -Eu "$(stat -c %U .)" sh -c 'export TRAFO_MAXERR=100 SKIP_LINT=y; (
     && npm run users \
     && npm run lrl dis \
     && npm run lrl pg \
-    && npm run pu \
     && echo
   echo "started: $ST. REWRITE_BASEURL was ‹$REWRITE_BASEURL›"
   echo "done:    $(date -R)"
