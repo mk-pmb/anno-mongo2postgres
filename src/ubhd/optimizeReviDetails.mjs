@@ -1,6 +1,7 @@
 // -*- coding: utf-8, tab-width: 2 -*-
 
 import equal from 'equal-pmb';
+import mustBe from 'typechecks-pmb/must-be.js';
 import objMapValues from 'lodash.mapvalues';
 
 import fixAuthor from './fixAuthor.mjs';
@@ -17,8 +18,10 @@ const EX = async function optimizeReviDetails(reviAnno, job) {
   await optimizeReviDetails.orig(reviAnno, job);
   const { data, divePath } = reviAnno;
   delete data.doi;
-  if (!data.type) { data.type = 'Annotation'; }
-  if (data.type.length === 1) { data.type = String(data.type); }
+  if ((data.type || false).length === 1) { data.type = String(data.type); }
+  mustBe.oneOf([undefined, 'Annotation'], 'Anno type')(data.type);
+  mustBe.oneOf([undefined], 'Anno @context')(data['@context']);
+
   namedEqual('versionIndices.length', divePath.versionIndices.length, 1);
   const versId = (divePath.expectedContainerAnnoId + '~'
     + (divePath.versionIndices[0] + 1));
@@ -49,6 +52,7 @@ const EX = async function optimizeReviDetails(reviAnno, job) {
   // const origData = { ...data };
   function omitKey(k) { delete data[k]; }
   EX.computableTopLevelKeys.forEach(omitKey);
+  mustBe('undef', 'data.id after omitKey')(data.id);
 
   data.body = fixBodies(versId, data.body, job);
 
@@ -66,6 +70,7 @@ const EX = async function optimizeReviDetails(reviAnno, job) {
     job.counters.add('nonStandardTopLevelKey:' + k + '=' + v);
   });
 
+  mustBe('undef', 'data.id before rewrite baseURL')(data.id);
   rewriteAnnoBaseUrls.inplace(data);
 };
 
@@ -78,7 +83,6 @@ EX.computableTopLevelKeys = [
 
 
 EX.standardTopLevelKeys = [
-  '@context',
   'as:inReplyTo',
   'body',
   'canonical',
@@ -90,7 +94,6 @@ EX.standardTopLevelKeys = [
   'motivation',
   'rights',
   'target',
-  'type',
 ];
 
 

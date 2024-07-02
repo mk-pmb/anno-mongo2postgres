@@ -20,10 +20,27 @@ Object.assign(EX, {
 
   inplace(anno) { return Object.assign(anno, EX(anno)); },
 
-  maybeRewrite(data, key) {
-    if (key === 'body') { return data; }
-    if (key === 'dc:title') { return data; }
-    let tmp = JSON.stringify(data).split(annoBaseUrl);
+  ignoreFields: [
+    'body',
+    'dc:title',
+  ],
+
+  rewriteFields: [
+    'as:inReplyTo',
+    'target',
+  ],
+
+  maybeRewrite(origVal, key) {
+    if (EX.ignoreFields.includes(key)) { return origVal; }
+    let tmp = JSON.stringify(origVal).split(annoBaseUrl);
+    if (tmp.length < 2) { return origVal; }
+
+    if (!EX.rewriteFields.includes(key)) {
+      const e = ('Anno has the base URL in field ' + key + ': ' + tmp.map(
+        p => p.slice(0, 1024)).join('\n!! ' + annoBaseUrl + ' !!\n'));
+      throw new Error(e);
+    }
+
     tmp = tmp.map(x => x.replace(/^(anno\/)+/, ''));
     tmp = tmp.join(rewriteBaseUrlTo);
     tmp = JSON.parse(tmp);
