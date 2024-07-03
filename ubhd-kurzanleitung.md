@@ -92,7 +92,7 @@ Annotationen umwandeln
     sonst beschwert sich der Anno-Server
     `Currently, only local anno IDs are supported.`
     Füge dazu im nächste Schritt vor `npm` noch sowas ein wie:
-    `REWRITE_BASEURL=https://anno.ub.uni-heidelberg.de/anno-test/`
+    `REWRITE_BASEURL=https://anno.ub.uni-heidelberg.de/anno-test/anno/`
 1.  `sudo -u annosrv npm run lrl pg`
     * Übersetzt die aufgespaltenen Annos ins neue Postgres-Format.
     * Fehlerprotokoll: `src/tmp.ubhd.convertDissectedAnnos.err`

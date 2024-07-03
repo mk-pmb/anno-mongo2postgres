@@ -14,7 +14,7 @@ function cli_main () {
   export NODEJS_HEAP_MAX_MB="$MAX_MEM_MB"
 
   while [ -n "$1" ]; do case "$1" in
-    a-t ) export REWRITE_BASEURL='../anno-test/'; shift;;
+    a-t ) export REWRITE_BASEURL='../anno-test/anno/'; shift;;
     * ) break;
   esac; done
 
