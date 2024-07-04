@@ -20,17 +20,17 @@ const EX = function fixAuthor(anno, job) {
   const creator = unpackSingleArrayElement(data, 'creator');
   if (!creator) { return; }
 
-  const uuid = getOwn(authorIdentities.byLegacyName, (creator.id || creator));
+  const crId = String(creator.id || creator || '');
+  const uuid = getOwn(authorIdentities.byLegacyName, crId);
   const agent = (uuid && getOwn(authorIdentities.byUUID, uuid));
   if (agent) {
     data.creator = agent;
     return;
   }
 
-  const id = String(creator.id || creator || '');
   data.creator = {
-    id: 'data:text/plain,' + encodeURI(id),
-    name: (creator.displayName || id.split(/\W/)[0]),
+    id: 'data:text/plain,' + encodeURI(crId),
+    name: (creator.displayName || crId.split(/\W/)[0]),
   };
 
   // console.error('no author:', anno);
