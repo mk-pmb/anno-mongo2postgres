@@ -17,9 +17,7 @@ function unpackSingleArrayElement(anno, key) {
 
 const EX = function fixAuthor(anno, job) {
   const { data } = anno;
-  const target = unpackSingleArrayElement(data, 'target');
   const creator = unpackSingleArrayElement(data, 'creator');
-  if (!target) { return; } // How did we even get here?
   if (!creator) { return; }
 
   const uuid = getOwn(authorIdentities.byLegacyName, (creator.id || creator));
