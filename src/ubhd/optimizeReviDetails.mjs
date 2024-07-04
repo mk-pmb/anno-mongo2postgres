@@ -46,8 +46,8 @@ const EX = async function optimizeReviDetails(reviAnno, job) {
       data['dc:title'] = title;
     }
   }
-  await fixAuthor(reviAnno, job);
-  await rewriteReplyTo(reviAnno, job);
+  fixAuthor(reviAnno, job);
+  rewriteReplyTo(reviAnno, job);
 
   // const origData = { ...data };
   function omitKey(k) { delete data[k]; }
