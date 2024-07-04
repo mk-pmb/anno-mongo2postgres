@@ -6,6 +6,7 @@ import objMapValues from 'lodash.mapvalues';
 
 import fixAuthor from './fixAuthor.mjs';
 import fixBodies from './fixBodies.mjs';
+import fixSvgPolyline from './fixSvgPolyline.mjs';
 import rewriteAnnoBaseUrls from './rewriteAnnoBaseUrls.mjs';
 import rewriteReplyTo from './rewriteReplyTo.mjs';
 import ubFacts from './facts.mjs';
@@ -48,6 +49,8 @@ const EX = async function optimizeReviDetails(reviAnno, job) {
   }
   fixAuthor(reviAnno, job);
   rewriteReplyTo(reviAnno, job);
+
+  fixSvgPolyline(reviAnno, job);
 
   // const origData = { ...data };
   function omitKey(k) { delete data[k]; }

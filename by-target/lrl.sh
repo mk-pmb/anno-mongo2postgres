@@ -113,6 +113,7 @@ function lrl_check_badwords () {
     s~["/](citations|passages|scholia)/urn:cts:greekLit:tlg~<ok>~g
     s~https://nbn-resolving\.de/urn:nbn:~<ok>~g
     s~.{0,40}urn:.{0,40}~\a&\f~g
+    s~.{0,40}polyline.{0,40}~\a&\f~g
     '
   BADWORDS="$(<tmp.pg.anno_data.sql sed -rf <(echo "$BADWORDS"
     ) | grep -m 10 --color=always -noPe '\a[^\f]+')"
