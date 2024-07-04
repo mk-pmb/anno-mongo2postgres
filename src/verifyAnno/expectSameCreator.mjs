@@ -4,7 +4,14 @@ import equal from 'equal-pmb';
 import getOwn from 'getown';
 
 
+function isSingleElementArray(x) {
+  return (Array.isArray(x) && (x.length === 1));
+}
+
+
 const EX = function expectSameCreator(ac, ex, job) {
+  if (isSingleElementArray(ac)) { return EX(ac[0], ex, job); }
+  if (isSingleElementArray(ex)) { return EX(ac, ex[0], job); }
   const cas = job.creatorAliases;
   if (cas && ex && ex.id && ac && ac.id) {
     if (ac.id === ex.id) { return; }

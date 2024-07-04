@@ -13,6 +13,7 @@ const EX = function verifyOldRevision(how, origRevi, reviIdx) {
     job,
   } = how;
   mustBe('obj', 'how.job')(job);
+  mustBe('obj | nonEmpty str', 'expectedData.creator')(expectedData.creator);
   const caid = origRevi.divePath.expectedContainerAnnoId;
   vTry(function fallibleVerifyRevision() {
     const revi = origRevi.api.clone();

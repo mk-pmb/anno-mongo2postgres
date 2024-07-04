@@ -2,7 +2,6 @@
 
 import mustBe from 'typechecks-pmb/must-be.js';
 import objMapValues from 'lodash.mapvalues';
-import objPop from 'objpop';
 import pgDumpWriter from 'postgres-dump-writer-helpers-220524-pmb';
 
 import verify from '../verifyAnno/index.mjs';
@@ -13,9 +12,9 @@ const sqlWriter = pgDumpWriter.makeFileMappedSqlWriter({
 });
 
 
-const EX = function fmtInserts(anno, auxMeta) {
-  const auxPop = objPop(auxMeta, { mustBe }).mustBe;
-  const reviNum = auxPop('pos int', 'reviNum').toFixed(0);
+const EX = function fmtInserts(anno) {
+  const { reviNum } = anno;
+  mustBe('pos int', 'reviNum')(reviNum);
   verify.reviUrl(anno, 'id', { reviNum });
   const idParts = {
     base_id: anno.divePath.expectedContainerAnnoId,
