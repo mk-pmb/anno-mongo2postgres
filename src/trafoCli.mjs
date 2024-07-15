@@ -15,6 +15,12 @@ import vTry from 'vtry';
 import mongoIdFakers from './mongoIdFakers.mjs';
 
 
+const defaultConfig = {
+  limit: 1e3,
+  progressInterval: 5e3,
+};
+
+
 const doNothing = Boolean;
 
 const filterUnconfirmed = makeFilter({
@@ -112,14 +118,14 @@ trafoCli.core = async function trafoCliCore(coreArgs) {
 
   const data = await readRelaxedJsonFromStdin({
     ...cliOpt,
-    defaultLimit: 1e3,
+    defaultLimit: defaultConfig.limit,
     logFunc: console.error,
   });
   const nSliced = data.length;
   const maxErr = Math.max((+cliOpt.maxerr
     || +process.env.TRAFO_MAXERR
     || 0), 0) || 1;
-  const progressInterval = (+cliOpt.prgi || 1e3);
+  const progressInterval = (+cliOpt.prgi || defaultConfig.progressInterval);
   let remainMaxErr = maxErr;
   const { eachToplevelRecord } = job;
   await pEachSeries([].concat(data), async function topLevelRecord(rec, idx) {
