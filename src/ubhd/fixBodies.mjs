@@ -141,8 +141,8 @@ function guessLinkingBodyValueFromSource(s, v) {
 
 
 const EX = function fixBodies(versId, origBodies, job) {
-  let bodies = arrayOfTruths(origBodies);
-  bodies = bodies.map(function foundBody(origBody, idx) {
+  let bodies = origBodies;
+  bodies = arrayOfTruths.ifAnyMap(bodies, function foundBody(origBody, idx) {
     const trace = versId + '#' + idx;
     const traceUrl = 'anno://' + versId + '#body[' + idx + ']';
     const body = objMapValues(origBody, fixStr);
@@ -157,9 +157,18 @@ const EX = function fixBodies(versId, origBodies, job) {
         d[body.value + '|' + body.label] = trace;
       }
     }
+
+    if (body.predicate && body.source) {
+      if (body.type === 'TextualBody') { delete body.type; }
+    }
+
     Object.keys(body).forEach(function hotfix(k) {
       const v = body[k];
-      if (v === '') { delete body[k]; }
+      if (v === '') { return delete body[k]; }
+      if (k === '@context') {
+        const j = JSON.stringify(v);
+        if (j === '{"@language":"de"}') { return delete body[k]; }
+      }
     });
 
     function drop() { job.counters.add('uselessBodiesDiscarded'); }
@@ -167,12 +176,12 @@ const EX = function fixBodies(versId, origBodies, job) {
     let bk = summarizeBodyKeys(body);
     if (!bk) { return drop(); }
 
-    const bt = mustBe.tProp('body#' + idx, body, [['oneOf', [
+    const bt = mustBe.tProp(traceUrl, body, [['oneOf', [
       undefined,
       'SpecificResource',
       'TextualBody',
     ]]], 'type');
-    const p = mustBe.tProp('body#' + idx, body, [['oneOf', [
+    const p = mustBe.tProp(traceUrl, body, [['oneOf', [
       undefined,
       'classifying',
       'linking',
@@ -240,6 +249,9 @@ const EX = function fixBodies(versId, origBodies, job) {
           source: body.source,
         });
       }
+      const u = 'Unexpected linking body: ' + bk + ' @ ' + traceUrl;
+      console.error(u, body);
+      throw new Error(u);
     }
 
     if (p === 'classifying') {
@@ -281,8 +293,24 @@ const EX = function fixBodies(versId, origBodies, job) {
     const d = job.hint(i + 'Examples', undefined, {});
     d[t] = trace;
     return body;
-  });
-  bodies = arrayOfTruths(bodies);
+  }, function checkUncommonTextualBodies(body, idx) {
+    if (body.type !== 'TextualBody') { return body; }
+    const u = 'uncommonTextualBody:';
+    const w = { ...body };
+    delete w.format;
+    delete w.type;
+    if (w.value) { delete w.value; } else { w.value = '¬'; }
+    if (w['rdf:predicate']) { w['rdf:predicate'] = '…'; }
+    if (w.source) { w.source = '…'; }
+    if (idx !== 0) { w.index = idx; }
+    if (Object.keys(w).length) {
+      // console.error('W:', u, traceUrl, w);
+      job.counters.add(u + '*');
+      job.counters.add(u + JSON.stringify(w).replace(/"/g, ''));
+    }
+    if (!(body.value || body.purpose)) { return; }
+    return body;
+  }) || [];
   if (!bodies.length) {
     // job.assume('hasActualBody:' + versId);
     job.counters.add('noActualBody');
