@@ -41,7 +41,7 @@ const EX = async function optimizeReviDetails(reviAnno, job) {
     }
     let title = data['dc:title'];
     if (title) {
-      if (title.startsWith('Bildzyklus ')) {
+      if (!title.startsWith('Bildzyklus ')) {
         title = 'Bildzyklus zum ›Welschen Gast‹, ' + title;
       }
       data['dc:title'] = title;
