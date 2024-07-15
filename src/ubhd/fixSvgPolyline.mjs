@@ -20,15 +20,15 @@ const EX = function fixSvgPolyline(anno, job) {
         pointCoords.pop();
         // const h = job.hint('polyline:closed', undefined, {});
         // h[trace] = m;
-      } else {
-        job.hint('polyline:open', undefined, []).push(trace);
+        // } else {
+        //   job.hint('polyline:open', undefined, []).push(trace);
       }
       const nCoord = pointCoords.length;
       if (nCoord === 2) {
         const l = EX.coordsToLine(pointCoords);
-        console.error(trace);
-        console.error('X<', m);
-        console.error('->', l);
+        // console.error('Fix SVG:', trace);
+        // console.error('  old:', m);
+        // console.error('  new:', l);
         return l;
       }
       if (nCoord < 3) {

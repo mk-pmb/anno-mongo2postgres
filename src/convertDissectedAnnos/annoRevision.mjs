@@ -45,8 +45,8 @@ async function annoRevision(job, origReviAnno) {
       reviAnno.data[k] = initVerData[k];
       const c = 'revisionInheritedField:' + k;
       job.counters.add(c);
-      if (k === 'creator') { return; }
-      job.hint(c, undefined, []).push(reviAnno.recId);
+      // if (k === 'creator') { return; }
+      // job.hint(c, undefined, []).push(reviAnno.recId);
     });
   }
 
