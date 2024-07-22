@@ -11,20 +11,6 @@ import sortedJson from 'safe-sortedjson';
 function uc1st(s) { return s.slice(0, 1).toUpperCase() + s.slice(1); }
 
 
-function fixStr(s) {
-  if (!isStr(s)) { return s; }
-  let b = s.trim();
-  // Fix U+0308 combining diaeresis (̈)
-  b = b.replace('a\u0308', 'ä');
-  b = b.replace('A\u0308', 'Ä');
-  b = b.replace('o\u0308', 'ö');
-  b = b.replace('O\u0308', 'Ö');
-  b = b.replace('u\u0308', 'ü');
-  b = b.replace('U\u0308', 'Ü');
-  return b;
-}
-
-
 function decideLabelValueConflict(body) {
   const v = body.value;
   const l = body.label;
@@ -145,7 +131,7 @@ const EX = function fixBodies(versId, origBodies, job) {
   bodies = arrayOfTruths.ifAnyMap(bodies, function foundBody(origBody, idx) {
     const trace = versId + '#' + idx;
     const traceUrl = 'anno://' + versId + '#body[' + idx + ']';
-    const body = objMapValues(origBody, fixStr);
+    const body = { ...origBody };
     if (body.label) {
       const v = decideLabelValueConflict(body);
       if (v) {

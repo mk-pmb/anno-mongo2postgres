@@ -35,6 +35,7 @@
     "delay": "^4.4.1",
     "equal-pmb": "^0.1.28",
     "filter-container-entries-pmb": "^0.2.0",
+    "fix-unicode-strings-deeply-inplace-pmb": "^0.1.0",
     "getown": "^1.0.0",
     "is-string": "^1.0.7",
     "lodash.mapvalues": "^4.6.0",
