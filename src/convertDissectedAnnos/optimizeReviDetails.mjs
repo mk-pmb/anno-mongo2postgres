@@ -5,7 +5,7 @@ import fixStringsDeeplyInplace from 'fix-unicode-strings-deeply-inplace-pmb';
 
 const EX = async function optimizeReviDetails(anno) {
   const { data } = anno;
-  fixStringsDeeplyInplace(data);
+  fixStringsDeeplyInplace(data, { eol: true, trim: true });
   data.created = anno.meta.time_created;
   const title = String(data['dc:title'] || data.title || '').trim();
   delete data.title;

@@ -1,11 +1,15 @@
 // -*- coding: utf-8, tab-width: 2 -*-
 
+import fs from 'fs';
+
 import arrayOfTruths from 'array-of-truths';
 import getOwn from 'getown';
 import isStr from 'is-string';
 import mustBe from 'typechecks-pmb/must-be.js';
 import objMapValues from 'lodash.mapvalues';
 import sortedJson from 'safe-sortedjson';
+
+import fixHtmlBody from './fixHtmlBody.mjs';
 
 
 function uc1st(s) { return s.slice(0, 1).toUpperCase() + s.slice(1); }
@@ -126,8 +130,56 @@ function guessLinkingBodyValueFromSource(s, v) {
 }
 
 
+const dumpStm = fs.createWriteStream('tmp.bodies.html');
+dumpStm.write('<!DOCTYPE html><meta charset="UTF-8">\n');
+
+
+function countHtmlTag(job, c, t, a, trace) {
+  if (c && a) {
+    console.error('countHtmlTag:', { c, t, a }, trace);
+    throw new Error('A closing HTML tag must not have attributes!');
+  }
+  if (!a) {
+    // selective whitelist
+    if (t === 'Kopfbedeckung') { return; } // d-nb:gnd:4373143-0
+    const d = t + ':' + (c || '¬');
+    const ok = (countHtmlTag.ok.has(d)
+      || (c && countHtmlTag.ok.has(t + ':¬')) /*
+        ^-- when the attribute-less opening tag is allowed,
+            then the closing tag must be allowed as well. */
+      || fixHtmlBody.okEmptyBlockHtmlTags.includes(t)
+      || fixHtmlBody.okEmptyInlineHtmlTags.includes(t));
+    if (ok) {
+      // job.counters.add('okEmptyBodyHtmlTag:' + t);
+      return;
+    }
+    job.hintDictWithCounter('unexpectedBodyHtmlTag', d, trace);
+    return;
+  }
+  const attrNames = [];
+  a.replace(/\s((?:class|style)="[^"<>]*"|[\w:\-]+(?==))/g,
+    (m, b) => attrNames.push(b));
+  const d = t + ':' + (attrNames.sort().join(',') || ('¬' + a));
+  if (countHtmlTag.ok.has(d)) {
+    // job.counters.add('okBodyHtmlAttr:' + d);
+    return;
+  }
+  job.counters.add('unexpectedBodyHtmlAttr:' + d);
+}
+countHtmlTag.ok = new Set([
+  'a:/',
+  'a:href',
+  'a:id,name',
+  'img:alt,src',
+  'img:src',
+  'p:¬',
+  'p:class="ql-align-right"',
+]);
+
+
 const EX = function fixBodies(versId, origBodies, job) {
   let bodies = origBodies;
+  function drop() { job.counters.add('uselessBodiesDiscarded'); }
   bodies = arrayOfTruths.ifAnyMap(bodies, function foundBody(origBody, idx) {
     const trace = versId + '#' + idx;
     const traceUrl = 'anno://' + versId + '#body[' + idx + ']';
@@ -155,8 +207,6 @@ const EX = function fixBodies(versId, origBodies, job) {
         if (j === '{"@language":"de"}') { return delete body[k]; }
       }
     });
-
-    function drop() { job.counters.add('uselessBodiesDiscarded'); }
 
     let bk = summarizeBodyKeys(body);
     if (!bk) { return drop(); }
@@ -297,6 +347,28 @@ const EX = function fixBodies(versId, origBodies, job) {
     // job.assume('hasActualBody:' + versId);
     job.counters.add('noActualBody');
   }
+
+  bodies.forEach(function dumpBody(body, idx) {
+    const trace = versId + '#body[' + idx + ']';
+    dumpStm.write('<dl data-url="' + trace + '">\n');
+    if (body.type === 'TextualBody') {
+      if (body.format === 'text/html') {
+        // eslint-disable-next-line no-param-reassign
+        body.value = fixHtmlBody(trace, body.value, job);
+      }
+    }
+    objMapValues(body, function bodyPart(v, k) {
+      let bpt = String(v && typeof v);
+      if (bpt === 'object') { bpt = k + '={' + Object.keys(v).sort() + '}'; }
+      job.counters.add('bodyPartType:' + bpt);
+      dumpStm.write('  <dt>' + k + '</dt><dd>' + v + '</dd>\n');
+      String(v || '').replace(/<(\/?)([\w:\-]+)([^<>]*)/g,
+        (m, c, t, a, i, orig) => countHtmlTag(job, c, t, a,
+          [trace, orig.slice(0, i), orig.slice(i)]));
+    });
+    dumpStm.write('</dl><!-- ' + trace + ' -->\n');
+  });
+
   if (bodies.length === 1) { return bodies[0]; }
   return bodies;
 };
