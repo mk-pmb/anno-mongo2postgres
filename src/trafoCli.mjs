@@ -45,7 +45,6 @@ const jobApi = {
   },
 
   hint(k, v, w) { // key, value, weakValue
-    // To start a dictionary: job.hint(dictName, undefined, {}).entry = val;
     const o = this.hints[k];
     if (v !== undefined) {
       this.hints[k] = v;
@@ -56,6 +55,17 @@ const jobApi = {
       return w;
     }
     return o;
+  },
+
+  hintDict(dictName, k, v) {
+    const d = this.hint(dictName, undefined, {});
+    if (k !== undefined) { d[k] = v; }
+    return d;
+  },
+
+  hintDictWithCounter(dictName, k, v) {
+    this.counters.add(dictName + ':' + k);
+    return this.hintDict(dictName, k, v);
   },
 
   skipRec() { this.counters.add('skipped'); },

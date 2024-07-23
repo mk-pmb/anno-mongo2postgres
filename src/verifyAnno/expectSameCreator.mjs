@@ -17,7 +17,7 @@ const EX = function expectSameCreator(ac, ex, job) {
     if (ac.id === ex.id) { return; }
     let alias = getOwn(cas, ac.id);
     if (!alias) {
-      const learn = job.hint('assumedCreatorAliases', undefined, {});
+      const learn = job.hintDict('assumedCreatorAliases');
       alias = getOwn(learn, ac.id);
       if (!alias) {
         alias = ex.id;

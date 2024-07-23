@@ -139,8 +139,7 @@ const EX = function fixBodies(versId, origBodies, job) {
         body.value = v;
         delete body.label;
       } else {
-        const d = job.hint('unmatchedValues', undefined, {});
-        d[body.value + '|' + body.label] = trace;
+        job.hintDict('unmatchedValues', body.value + '|' + body.label, trace);
       }
     }
 
@@ -189,9 +188,9 @@ const EX = function fixBodies(versId, origBodies, job) {
 
 
     function sourceMissing() {
-      const d = job.hint(p + 'BodyValueWithoutSource', undefined, {});
       let k = body.value;
       k = getOwn(sourceMissing.aliases, k, k);
+      const d = job.hintDict(p + 'BodyValueWithoutSource');
       d[k] = (d[k] || []).concat(traceUrl);
     }
     sourceMissing.aliases = {
@@ -208,8 +207,7 @@ const EX = function fixBodies(versId, origBodies, job) {
         if (v) {
           body.value = v;
         } else {
-          const d = job.hint(p + 'BodySourceWithoutValue', undefined, {});
-          d[body.source] = trace;
+          job.hintDict(p + 'BodySourceWithoutValue', body.source, trace);
         }
       }
       if (bk === 'source,value') { body.predicate = rdfSchema + 'seeAlso'; }
@@ -274,14 +272,12 @@ const EX = function fixBodies(versId, origBodies, job) {
     // job.assume('validBodyType:' + versId, { k: bk, purpose: p });
     const i = 'invalidBodyType';
     const t = p + '{' + bk + '}';
-    job.counters.add(i);
+    job.hintDictWithCounter(i, t, trace);
     job.counters.add(i + ':' + t);
-    const d = job.hint(i + 'Examples', undefined, {});
-    d[t] = trace;
     return body;
   }, function checkUncommonTextualBodies(body, idx) {
     if (body.type !== 'TextualBody') { return body; }
-    const u = 'uncommonTextualBody:';
+    const u = 'uncommonTextualBody';
     const w = { ...body };
     delete w.format;
     delete w.type;
@@ -291,8 +287,8 @@ const EX = function fixBodies(versId, origBodies, job) {
     if (idx !== 0) { w.index = idx; }
     if (Object.keys(w).length) {
       // console.error('W:', u, traceUrl, w);
-      job.counters.add(u + '*');
-      job.counters.add(u + JSON.stringify(w).replace(/"/g, ''));
+      job.counters.add(u + ':*');
+      job.hintDictWithCounter(u, JSON.stringify(w).replace(/"/g, ''), trace);
     }
     if (!(body.value || body.purpose)) { return; }
     return body;

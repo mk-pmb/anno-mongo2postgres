@@ -18,8 +18,7 @@ const EX = function fixSvgPolyline(anno, job) {
       const [lastCoord] = pointCoords.slice(-1);
       if (lastCoord === firstCoord) {
         pointCoords.pop();
-        // const h = job.hint('polyline:closed', undefined, {});
-        // h[trace] = m;
+        // job.hintDict('polyline:closed', trace, m);
         // } else {
         //   job.hint('polyline:open', undefined, []).push(trace);
       }
@@ -32,8 +31,7 @@ const EX = function fixSvgPolyline(anno, job) {
         return l;
       }
       if (nCoord < 3) {
-        const h = job.hint('polyline:tooFewPoints', undefined, {});
-        h[trace] = pointsStr;
+        job.hintDict('polyline:tooFewPoints', trace, pointsStr);
       }
       return '<polygon points="' + pointCoords.join(' ') + '" />';
     });
