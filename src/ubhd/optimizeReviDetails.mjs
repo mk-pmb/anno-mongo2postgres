@@ -57,7 +57,7 @@ const EX = async function optimizeReviDetails(reviAnno, job) {
   EX.computableTopLevelKeys.forEach(omitKey);
   mustBe('undef', 'data.id after omitKey')(data.id);
 
-  data.body = fixBodies(versId, data.body, job);
+  data.body = fixBodies(versId, data, job);
 
   objMapValues(data, function checkTopLevelKey(v, k) {
     if (EX.standardTopLevelKeys.includes(k)) { return; }

@@ -24,6 +24,10 @@ function makeDumpStreamWriter(destFilename, init) {
 
 const dumpBodies = makeDumpStreamWriter('tmp.bodies.html',
   '<!DOCTYPE html><meta charset="UTF-8">\n');
+const cpgTitleAnomaly = makeDumpStreamWriter('tmp.cpg-title-anomalies.tsv',
+  'Author name\tTitle prefix\tAnno\n');
+const cpgNoSource = makeDumpStreamWriter('tmp.cpg-no-source.tsv',
+  'Author name\tTitle\tAnno\n');
 
 
 function decideLabelValueConflict(body) {
@@ -184,8 +188,8 @@ countHtmlTag.ok = new Set([
 ]);
 
 
-const EX = function fixBodies(versId, origBodies, job) {
-  let bodies = origBodies;
+const EX = function fixBodies(versId, annoData, job) {
+  let bodies = annoData.body;
   function drop() { job.counters.add('uselessBodiesDiscarded'); }
   bodies = arrayOfTruths.ifAnyMap(bodies, function foundBody(origBody, idx) {
     const trace = versId + '#' + idx;
@@ -243,6 +247,39 @@ const EX = function fixBodies(versId, origBodies, job) {
       return goodBody;
     }
 
+    if (bt === 'TextualBody') {
+      if (bk === 'format,type') { return drop(); }
+    }
+
+    const annoTitle = annoData['dc:title'] || annoData.title || '';
+    const authorName = annoData.creator.name || '??';
+    let isCpg23;
+    (function verifyOrFixCPGraec() {
+      if (!annoTitle) { return; }
+      const m = (/^(\w+|\S*pigram\w*) (\d+(?:\.\d+)+)$/.exec(annoTitle)
+        || /^(Epigram|Scholion) (\d+)$/.exec(annoTitle));
+      if (!m) { return; }
+      if (m[1] === 'Foreword') { return; }
+      const es = (((m[1] === 'Epigram') && 'e')
+        || ((m[1] === 'Scholion') && 's'));
+      if (!es) {
+        job.counters.add('cpgTitleAnomaly:' + m[1]);
+        cpgTitleAnomaly([authorName, m[1], trace].join('\t') + '\n');
+        return;
+      }
+      // acceptMissingSourceBodies = 'cpg:' + es;
+      let sc = annoData.target;
+      sc = ((sc[0] || sc).scope || sc || '');
+      const digi = 'https://digi.ub.uni-heidelberg.de/';
+      const proj = (sc.startsWith(digi)
+        && sc.slice(digi.length).replace(/\/\d+$/, ''));
+      isCpg23 = ((proj === 'diglit_protected/cpgraec23_test')
+        || (proj === 'diglit_protected/cpgraec23')
+        || (proj === 'diglit/cpgraec23_test')
+        || (proj === 'diglit/cpgraec23')) && sc;
+      if (!isCpg23) { throw new Error('Expected cpg23: ' + sc); }
+    }());
+
 
     function sourceMissing() {
       let k = body.value;
@@ -272,14 +309,18 @@ const EX = function fixBodies(versId, origBodies, job) {
       bk = summarizeBodyKeys(body);
 
       if (bk === 'predicate,value') {
-        // sourceMissing();
         mustBe.nest(trace + ' sourceMissing value', body.value);
-        return fixedIt({
+        const b = {
           type: 'TextualBody',
           purpose: p,
           'rdf:predicate': body.predicate,
           value: body.value,
-        });
+        };
+        if (isCpg23) {
+          cpgNoSource([authorName, annoTitle, trace].join('\t') + '\n');
+          b.source = { isCpg23 };
+        }
+        return fixedIt(b);
       }
       if ((bk === 'predicate,source,value') || (bk === 'predicate,source')) {
         return fixedIt({
@@ -332,27 +373,43 @@ const EX = function fixBodies(versId, origBodies, job) {
     job.hintDictWithCounter(i, t, trace);
     job.counters.add(i + ':' + t);
     return body;
-  }, function checkUncommonTextualBodies(body, idx) {
+  }) || [];
+
+  const textualBodies = [];
+  bodies = bodies.map(function checkUncommonTextualBodies(body, idx) {
     if (body.type !== 'TextualBody') { return body; }
     const u = 'uncommonTextualBody';
     const w = { ...body };
     delete w.format;
     delete w.type;
     if (w.value) { delete w.value; } else { w.value = '¬'; }
-    if (w['rdf:predicate']) { w['rdf:predicate'] = '…'; }
+    if (w['rdf:predicate']) {
+      w['rdf:predicate'] = '…';
+    }
+    if ((w.source || false).isCpg23) {
+      const b = { ...body };
+      delete b.source;
+      return b;
+    }
     if (w.source) { w.source = '…'; }
     if (idx !== 0) { w.index = idx; }
     if (Object.keys(w).length) {
       // console.error('W:', u, traceUrl, w);
       job.counters.add(u + ':*');
-      job.hintDictWithCounter(u, JSON.stringify(w).replace(/"/g, ''), trace);
+      job.hintDictWithCounter(u, JSON.stringify(w).replace(/"/g, ''),
+        versId + '#body[' + idx + ']');
     }
-    if (!(body.value || body.purpose)) { return; }
-    return body;
-  }) || [];
+    if (!(body.value || body.purpose)) { return false; }
+    textualBodies.push(body);
+    return false;
+  });
+  bodies = arrayOfTruths(textualBodies.concat(bodies));
   if (!bodies.length) {
     // job.assume('hasActualBody:' + versId);
     job.counters.add('noActualBody');
+  }
+  if (textualBodies.length > 1) {
+    job.counters.add('multipleTextualBodies:' + textualBodies.length);
   }
 
   bodies.forEach(function dumpBody(body, idx) {
