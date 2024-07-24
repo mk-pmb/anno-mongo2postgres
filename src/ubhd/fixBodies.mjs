@@ -187,6 +187,8 @@ countHtmlTag.ok = new Set([
   'p:class="text-justify"',
   'p:class="text-left"',
   'p:class="text-right"',
+  'small:/',
+  'small:¬',
 ]);
 
 

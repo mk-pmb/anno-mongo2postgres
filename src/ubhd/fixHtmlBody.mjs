@@ -66,7 +66,8 @@ EX.mainLoop = function mainLoop(input, trace) {
   h = h.replace(/<br[\/\s]+>/g, '<br>');
   h = h.replace(/<p>((?:<br>)*)<\/p>/g, '');
   h = h.replace(/(\s+)((?:<\/\w+>)+)/g, '$2$1');
-  h = h.replace(/<span class="ql-size-small">([^<>]*)<\/span>/g, '$1');
+  h = h.replace(/<span class="ql-size-small">([^<>]*)<\/span>/g,
+    '<small>$1</small>');
   h = EX.loop('Unpack useless tags loop', h, EX.unpackUselessTags);
   h = h.replace(/(<p>(?:<em>|))\[(\d+)\] ?/g,
     '$1<a id="_ftn$2" name="_ftn$2">[$2]</a> ');
