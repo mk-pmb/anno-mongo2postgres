@@ -301,7 +301,7 @@ const EX = function fixBodies(versId, annoData, job) {
         if (v) {
           body.value = v;
         } else {
-          job.hintDict(p + 'BodySourceWithoutValue', body.source, trace);
+          job.assume(p + 'BodySourceHasValue:', { [trace]: body.source });
         }
       }
       if (bk === 'source,value') { body.predicate = rdfSchema + 'seeAlso'; }
@@ -396,8 +396,8 @@ const EX = function fixBodies(versId, annoData, job) {
     if (Object.keys(w).length) {
       // console.error('W:', u, traceUrl, w);
       job.counters.add(u + ':*');
-      job.hintDictWithCounter(u, JSON.stringify(w).replace(/"/g, ''),
-        versId + '#body[' + idx + ']');
+      job.hintDictWithCounter(u + 'Samples', JSON.stringify(w).replace(/"/g,
+        ''), versId + '#body[' + idx + ']');
     }
     if (!(body.value || body.purpose)) { return false; }
     textualBodies.push(body);
