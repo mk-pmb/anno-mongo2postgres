@@ -15,6 +15,17 @@ import fixHtmlBody from './fixHtmlBody.mjs';
 function uc1st(s) { return s.slice(0, 1).toUpperCase() + s.slice(1); }
 
 
+function makeDumpStreamWriter(destFilename, init) {
+  const stm = fs.createWriteStream(destFilename);
+  function w(...a) { stm.write(...a); }
+  if (init) { stm.write(init); }
+  return w;
+}
+
+const dumpBodies = makeDumpStreamWriter('tmp.bodies.html',
+  '<!DOCTYPE html><meta charset="UTF-8">\n');
+
+
 function decideLabelValueConflict(body) {
   const v = body.value;
   const l = body.label;
@@ -128,10 +139,6 @@ function guessLinkingBodyValueFromSource(s, v) {
     // :TODO: verify: Q_UqrnkZSIC5LzY2yrUeOA~3
   }
 }
-
-
-const dumpStm = fs.createWriteStream('tmp.bodies.html');
-dumpStm.write('<!DOCTYPE html><meta charset="UTF-8">\n');
 
 
 function countHtmlTag(job, c, t, a, trace) {
@@ -350,7 +357,7 @@ const EX = function fixBodies(versId, origBodies, job) {
 
   bodies.forEach(function dumpBody(body, idx) {
     const trace = versId + '#body[' + idx + ']';
-    dumpStm.write('<dl data-url="' + trace + '">\n');
+    dumpBodies('<dl data-url="' + trace + '">\n');
     if (body.type === 'TextualBody') {
       if (body.format === 'text/html') {
         // eslint-disable-next-line no-param-reassign
@@ -361,12 +368,12 @@ const EX = function fixBodies(versId, origBodies, job) {
       let bpt = String(v && typeof v);
       if (bpt === 'object') { bpt = k + '={' + Object.keys(v).sort() + '}'; }
       job.counters.add('bodyPartType:' + bpt);
-      dumpStm.write('  <dt>' + k + '</dt><dd>' + v + '</dd>\n');
+      dumpBodies('  <dt>' + k + '</dt><dd>' + v + '</dd>\n');
       String(v || '').replace(/<(\/?)([\w:\-]+)([^<>]*)/g,
         (m, c, t, a, i, orig) => countHtmlTag(job, c, t, a,
           [trace, orig.slice(0, i), orig.slice(i)]));
     });
-    dumpStm.write('</dl><!-- ' + trace + ' -->\n');
+    dumpBodies('</dl><!-- ' + trace + ' -->\n');
   });
 
   if (bodies.length === 1) { return bodies[0]; }
