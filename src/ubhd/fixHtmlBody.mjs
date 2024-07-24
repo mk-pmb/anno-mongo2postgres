@@ -54,7 +54,15 @@ EX.mainLoop = function mainLoop(input, trace) {
   h = h.replace(/(<a\b[^<>]*>)(<sup>)/g, '$2$1');
   h = h.replace(/(<\/sup>)(<\/a>)/g, '$2$1');
   h = h.replace(/<a>(<em>\[\d+\])<\/em><\/a><em>\s*/g, '$1 ');
-  h = h.replace(/(<p) class="ql-align-justify">/g, '$1>');
+  h = h.replace(/(<p class=")ql-align(-\w+">)/g, '$1text$2'); /*
+    Convert quill-specific alignment classes to Bootstrap:
+    A more neutral approach, that would also be easier to implement securely,
+    would be to use the align="…" attribute, but that has become deprecated in
+    HTML5. A direct style="…" attribute would require more effort in sanitizing
+    and would also waste more bytes.
+    Overall, using the Bootstrap classes seems to be a good compromise even for
+    clients that don't specifically understand Bootstrap, because a CSS shim
+    for the few alignment classes is simple and tiny. */
   h = h.replace(/<br[\/\s]+>/g, '<br>');
   h = h.replace(/<p>((?:<br>)*)<\/p>/g, '');
   h = h.replace(/(\s+)((?:<\/\w+>)+)/g, '$2$1');

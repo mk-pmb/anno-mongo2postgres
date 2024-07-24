@@ -184,7 +184,9 @@ countHtmlTag.ok = new Set([
   'img:alt,src',
   'img:src',
   'p:¬',
-  'p:class="ql-align-right"',
+  'p:class="text-justify"',
+  'p:class="text-left"',
+  'p:class="text-right"',
 ]);
 
 
