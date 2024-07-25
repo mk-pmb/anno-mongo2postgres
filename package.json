@@ -50,6 +50,7 @@
     "read-data-file": "^2.0.11",
     "read-relaxed-json-from-stdin-pmb": "^1.0.2",
     "safe-sortedjson": "^1.0.8",
+    "sanitize-html": "^2.13.0",
     "typechecks-pmb": "^0.240627.0",
     "usnam-pmb": "^0.2.5",
     "uuidv5": "^1.0.0",

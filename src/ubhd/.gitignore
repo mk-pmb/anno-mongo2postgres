@@ -1,4 +1,9 @@
 
+# Frontend symlinks
+/plugin.sanitize-html.js
+
+
+
 # Temporary files
 /tmp.*
 

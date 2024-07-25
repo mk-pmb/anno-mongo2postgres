@@ -158,8 +158,7 @@ function countHtmlTag(job, c, t, a, trace) {
       || (c && countHtmlTag.ok.has(t + ':¬')) /*
         ^-- when the attribute-less opening tag is allowed,
             then the closing tag must be allowed as well. */
-      || fixHtmlBody.okEmptyBlockHtmlTags.includes(t)
-      || fixHtmlBody.okEmptyInlineHtmlTags.includes(t));
+      || fixHtmlBody.okEmptyHtmlTags.all().includes(t));
     if (ok) {
       // job.counters.add('okEmptyBodyHtmlTag:' + t);
       return;

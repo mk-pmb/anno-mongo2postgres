@@ -1,16 +1,52 @@
 ﻿// -*- coding: utf-8, tab-width: 2 -*-
 
+import saniLib from 'sanitize-html';
+import eq from 'equal-pmb';
+
+// eslint-disable-next-line n/no-unpublished-import
+import preparePluginSanitizeHtml from './plugin.sanitize-html.js';
+
+const { okEmptyHtmlTags } = preparePluginSanitizeHtml;
+
+
 function fail(e) { throw new Error(e); }
 
-// const fail1s = e => s => fail(e + ': ' + s);
-// const imm = f => (...a) => setImmediate(f, ...a);
+function htmlEntities(s) {
+  let b = s;
+  b = b.replace(/&(?!amp;)/g, '&amp;');
+  return b;
+}
 
 
 const EX = function fixHtmlBody(trace, origHtml) {
   if (!origHtml) { return origHtml; }
-  return EX.loop('Main loop', origHtml, EX.mainLoop,
-    'fixHtmlBody: ' + trace + ': ');
+  const h = EX.core(trace, origHtml);
+  try { eq(EX.saniFunc(h), h); } catch (e) {
+    console.error(trace, e);
+    throw e;
+  }
+  return h;
 };
+
+
+EX.core = function core(trace, origHtml) {
+  let h = origHtml;
+  h = h.replace(/\u00A0/g, '&nbsp;');
+  h = h.replace(/&(\w*) /g, '&amp;$1');
+  h = h.replace(/&#34;/g, '&quot;');
+  h = EX.loop('Main loop', h, EX.mainLoop, 'fixHtmlBody: ' + trace + ': ');
+  h = EX.decodeQuotOutsideOfTags(h);
+  return h;
+};
+
+
+EX.decodeQuotOutsideOfTags = function decodeQuotOutsideOfTags(h) {
+  return h.replace(/<\w+( [^<>]*|)>/g, s => s.replace(/&quot;/g, '&quo\t;'))
+    .replace(/&quot;/g, '"').replace(/&quo\t;/g, '&quot;');
+};
+
+
+EX.saniFunc = preparePluginSanitizeHtml({ injected: { sani: saniLib } });
 
 
 EX.loop = function loopUntilNothingChanged(loopName, input, func, ...args) {
@@ -32,8 +68,10 @@ EX.loop = function loopUntilNothingChanged(loopName, input, func, ...args) {
 EX.mainLoop = function mainLoop(input, trace) {
   let h = input;
 
+  h = h.replace(/(<p>[^<>]*)&quot;/g, '$1"');
+  h = h.replace(/<p><br ?\/?><\/p>/g, '<p>&nbsp;</p>');
   h = h.replace(/<img class="citavipicker"[^<>]*>/g, '');
-  h = h.replace(/<a href="javascript:">(?:<\/a>)+/g, '');
+  h = h.replace(/<a href="javascript:"><\/a>/g, '');
   h = h.replace(/(<a) href="about:blank"/g, '$1');
   h = h.replace(/<(\w+) [^<>]*>/g, EX.fixHtmlTagAttrs);
   h = h.replace(/(<\/p>)(<p>)/g, '$1\n$2');
@@ -63,8 +101,12 @@ EX.mainLoop = function mainLoop(input, trace) {
     Overall, using the Bootstrap classes seems to be a good compromise even for
     clients that don't specifically understand Bootstrap, because a CSS shim
     for the few alignment classes is simple and tiny. */
-  h = h.replace(/<br[\/\s]+>/g, '<br>');
-  h = h.replace(/<p>((?:<br>)*)<\/p>/g, '');
+  h = h.replace(/\s*<br[\/\s]*>/g, '<br>');
+  h = h.replace(/<img [^<>]+/g, s => s.replace(/\s*\/?$/, ''));
+  h = h.replace(/(<\/p>\s*<p>)((?:<br>)*)/g, '$2$1');
+  h = h.replace(/^(<p>(?:\s|<br>)*<\/p>)+/g, '');
+  h = h.replace(/<p>\s*<\/p>/g, '');
+  h = h.replace(/<h2>((?:<br>)*)<\/h2>/g, ''); // bhfAp_IkSrmw6ytj3MMJlQ~2
   h = h.replace(/(\s+)((?:<\/\w+>)+)/g, '$2$1');
   h = h.replace(/<span class="ql-size-small">([^<>]*)<\/span>/g,
     '<small>$1</small>');
@@ -79,30 +121,13 @@ EX.mainLoop = function mainLoop(input, trace) {
 };
 
 
-EX.okEmptyBlockHtmlTags = [
-  'h2',
-  'li',
-  'ol',
-  'ul',
-];
-
-
-EX.okEmptyInlineHtmlTags = [
-  'br',
-  'em',
-  'i',
-  's',
-  'strong',
-  'sub',
-  'sup',
-  'u',
-];
+EX.okEmptyHtmlTags = okEmptyHtmlTags;
+EX.inlineTagsRgx = okEmptyHtmlTags.inline.join('|');
 
 
 EX.unpackUselessTags = (function compile() {
-  const inlineTags = EX.okEmptyInlineHtmlTags.join('|');
-  const rxMergeSpace = new RegExp('<(' + inlineTags + ')( [^<>]*|)>'
-    + '(\\s*)</(' + inlineTags + ')>', 'g');
+  const rxMergeSpace = new RegExp('<(' + EX.inlineTagsRgx + ')( [^<>]*|)>'
+    + '(\\s*)</(' + EX.inlineTagsRgx + ')>', 'g');
 
   const rxUnpackUselessTag = new RegExp('<span>'
     + '([^<>]*<(\\w+)(?: [^<>]+|)>[^<>]*</(\\w+)>[^<>]*)'
@@ -148,10 +173,9 @@ EX.blueUnderlinedUrls = function blueUnderlinedUrls(orig) {
 
 
 EX.mergeHomonymousTags = (function compile() {
-  const inlineTags = EX.okEmptyInlineHtmlTags.join('|');
-  const rxAttr = new RegExp('<(?:' + inlineTags + ')\\s[^<>]*>', 'g');
-  const rxMergeSpace = new RegExp('</(' + inlineTags
-    + ')>(\\s*)<(' + inlineTags + ')>', 'g');
+  const rxAttr = new RegExp('<(?:' + EX.inlineTagsRgx + ')\\s[^<>]*>', 'g');
+  const rxMergeSpace = new RegExp('</(' + EX.inlineTagsRgx
+    + ')>(\\s*)<(' + EX.inlineTagsRgx + ')>', 'g');
   return function mergeHomonymousTags(orig) {
     let h = orig;
     const attr = rxAttr.exec(orig);
@@ -244,6 +268,8 @@ EX.fixHtmlTagAttrs = function fixHtmlTagAttrs(orig, tagName) {
   let b = orig;
   b = b.replace(/ class="ql-cursor"/g, '');
   b = b.replace(/ style="[^"<>]*"/g, m => EX.fixHtmlTagInlineCss(m, tagName));
+  b = b.replace(/( \w+=")([^<>"]*)/g, (m, a, v) => a + htmlEntities(v));
+  b = b.replace(/ +(\w+=")/g, ' $1');
   return b;
 };
 
