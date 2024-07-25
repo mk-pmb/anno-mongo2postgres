@@ -28,6 +28,7 @@ function stichproben () {
     'lepke1937_04_09/0006/B-PspN0hTzmI1boaQawGzA'
 
     'cpgraec23/0204/cPnSOKkORUOLsKht0VQdWA' # ~1 und ~2: 100% gleich?
+    'perl1935_12_06/0104/bhfAp_IkSrmw6ytj3MMJlQ' # ~2: <h2><br></h2>
     'perl1937_03_18/0004/Cd6tRIwaThmpMnetnDqJKQ' # dp-cvv-0-0-0 (einzige cvv)
     'vollmer1915/0009/Tp28vHlXTUKIRFZ__LlSqQ' # ~1, ~2 und ~3: 100% gleich?
 
