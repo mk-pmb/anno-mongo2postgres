@@ -46,6 +46,12 @@ const EX = async function optimizeReviDetails(reviAnno, job) {
       }
       data['dc:title'] = title;
     }
+    if (data.rights) {
+      job.hintDictWithCounter('wgdLicenseKept', data.rights, versId);
+    } else {
+      data.rights = 'https://creativecommons.org/licenses/by/4.0/';
+      job.counters.add('wgdLicenseFixed');
+    }
   }
   fixAuthor(reviAnno, job);
   rewriteReplyTo(reviAnno, job);
