@@ -36,8 +36,20 @@ function stichproben () {
     'NtWgKL9aTQ60Eqfxsw3N5w' # "Zylinder <Kopfbedeckung>" d-nb:gnd:4373143-0
 
     )
+  local ANUB='https://anno.ub.uni-heidelberg.de/anno/'
+  local DIGI='https://digi.ub.uni-heidelberg.de/diglit/'
+  local LHF="http://localhost:33380/anno-frontend/test/html/$(
+    )displayAnnotations.nm.html?cmp1="
+  local HCDA='https://servhc42.ub.uni-heidelberg.de/diglit/anno/'
   local URL= VAL=
   for ANNO in "${ANNOS[@]}"; do
+    sleep 1s
+    # gtame wafo "$LHF${ANNO##*/}"
+    # gtame ffox "$HCDA${ANNO##*/}"
+    echo "$ANUB${ANNO##*/}"
+    # echo "$DIGI$ANNO"
+    continue
+
     URL="https://servhc42.ub.uni-heidelberg.de/diglit/$ANNO/image,info"
     VAL="$(curl --silent -- "$URL" | grep -Fe 'Book not found')"
     if [ -n "$VAL" ]; then
