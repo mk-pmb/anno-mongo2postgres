@@ -77,8 +77,8 @@ function lrl_cda () {
 
   echo -n 'Generating combined SQL files: '
   local DATA_FILES=( tmp.pg.*.sql )
-  concat_sql_files tmp.pg.combo_reset.sql "$STRU" \
-    "${DATA_FILES[@]}" || return $?
+  # concat_sql_files tmp.pg.combo_reset.sql "$STRU" \
+  #   "${DATA_FILES[@]}" || return $?
   concat_sql_files tmp.pg.combo_add.sql \
     "${DATA_FILES[@]}" || return $?
   rm -- tmp.pg.*.sql.gz
