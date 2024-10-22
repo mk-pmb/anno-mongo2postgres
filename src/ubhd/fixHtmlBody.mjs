@@ -36,6 +36,10 @@ EX.core = function core(trace, origHtml) {
   h = h.replace(/&#34;/g, '&quot;');
   h = EX.loop('Main loop', h, EX.mainLoop, 'fixHtmlBody: ' + trace + ': ');
   h = EX.decodeQuotOutsideOfTags(h);
+  h = h.replace(/>\s*(<(?:p|div))(?=\s|>)/g, '>\n$1');
+  h = h.replace(/(<\/(?:p|div)>)\s*/g, '$1\n');
+  h = h.replace(/\s*(<br[ \/]*>)\s*/g, '$1\n');
+  h = h.trim();
   return h;
 };
 
