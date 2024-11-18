@@ -39,6 +39,8 @@ EX.core = function core(trace, origHtml) {
   h = h.replace(/>\s*(<(?:p|div))(?=\s|>)/g, '>\n$1');
   h = h.replace(/(<\/(?:p|div)>)\s*/g, '$1\n');
   h = h.replace(/\s*(<br[ \/]*>)\s*/g, '$1\n');
+  h = h.replace(/(?:<br[ \/]*>|\s)+(<\/p>)\s*$/g, '$1');
+  h = h.replace(/(?:<p>\s*<\/p>|\s)+$/g, '');
   h = h.trim();
   return h;
 };
