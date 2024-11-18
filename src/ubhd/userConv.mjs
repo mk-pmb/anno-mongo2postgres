@@ -11,8 +11,10 @@ import uuidv5 from 'uuidv5';
 import translateLegacyRoles from './legacyRoles.json';
 import ubFacts from './facts.mjs';
 
-const { annoBaseUrl } = ubFacts;
-const uuidBaseUrl = annoBaseUrl + 'authors/uuidbase/';
+const { annoBaseUrl, serverBaseUrl } = ubFacts;
+const authorIdNamespace = '/authors/uuidbase/';
+const uuidBaseUrl = serverBaseUrl + authorIdNamespace;
+const buggyUuidAgentBaseUrl = annoBaseUrl + authorIdNamespace.slice(1);
 
 const customUserURLs = {
   'wgd@DWork':
@@ -23,6 +25,7 @@ const customUserURLs = {
 };
 const byLegacyName = {};
 const byUUID = {};
+let fixBuggyUuidAgentId = '';
 const namelessUsers = [];
 let as22currentUser;
 const as22usersYaml = {};
@@ -50,6 +53,9 @@ const EX = {
       byUUID,
     }, null, 2) + '\n';
     await promisingFs.writeFile('tmp.author_identities.json', output, 'UTF-8');
+
+    await promisingFs.writeFile('tmp.fixBuggyUuidAgentId.sed',
+      fixBuggyUuidAgentId, 'UTF-8');
 
     await promisingFs.writeFile('tmp.as22users.yaml', [
       '%YAML 1.2',
@@ -92,15 +98,36 @@ const EX = {
       logLineParts.push(legacyUserName);
     }
     agent.type = EX.guessAgentType(agent);
-    console.debug(logLineParts.join('\t'));
+    // console.debug(logLineParts.join('\t'));
+
+    /* Versions before 2024-11-12 had a bug that wrote a raw UUID as the
+      author ID key, causing the server to UUIDv5-hash it again.
+      Additionally, it used the annoBaseUrl instead of serverBaseUrl,
+      thus inserting an errornous "anno/" part into the profileUrl.
+      */
+    const buggyAgentUuid = uuidv5('url', buggyUuidAgentBaseUrl + lunEnc);
+    const buggyDoubleHashedUuid = uuidv5('url', uuidBaseUrl + buggyAgentUuid);
+    byLegacyName[buggyAgentUuid] = uuid;
+    byLegacyName['urn:uuid:' + buggyAgentUuid] = uuid;
+    byLegacyName[buggyDoubleHashedUuid] = uuid;
+    byLegacyName['urn:uuid:' + buggyDoubleHashedUuid] = uuid;
 
     as22currentUser = [
       'author_identities:',
-      `    '${uuid}':`,
-      `        'name': ${JSON.stringify(agent.name)}`,
-      `        'type': ${agent.type}`,
+      `    '${agent.id}':`,
+      `        # ^-- UUIDv5 of URL <${profileUrl}>`,
+      `        # Old wrong UUIDs: ${buggyAgentUuid}, ${buggyDoubleHashedUuid}`,
+      `        name: ${JSON.stringify(agent.name)}`,
+      `        type: ${agent.type}`,
     ];
     as22usersYaml[legacyUserName] = as22currentUser;
+
+    /* We use sed on an SQL dump and then do text replacement of the buggy
+       UUIDs because Postgres's JSON update functions would potentially
+       re-order the anno keys and may also alter the whitespace, both effects
+       causing needless diff noise when comparing backups. */
+    fixBuggyUuidAgentId += ('s~"urn:uuid:(' + buggyAgentUuid + '|'
+     + buggyDoubleHashedUuid + ')"~"' + agent.id + '"~g # ' + lunEnc + '\n');
 
     const aliases = [].concat(pop('undef | ary', 'alias')).filter(Boolean);
     if (aliases.length) {
