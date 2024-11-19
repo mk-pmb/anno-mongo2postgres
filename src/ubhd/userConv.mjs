@@ -38,12 +38,18 @@ function mustPop(x) { return objPop(x, { mustBe }).mustBe; }
 function flatMapObj(x, f) { return Object.entries(x).map(v => f(...v)); }
 
 
+function expectSingleNestProp(dictDescr, dictObj, key) {
+  const j = Object.keys(dictObj).join(', ');
+  mustBe('eeq:"' + key + '"', 'Keys in ' + dictDescr)(j);
+  return mustBe.nest('Property ' + key + ' in ' + dictDescr, dictObj[key]);
+}
+
 
 const EX = {
 
   async main() {
     const userCfg = await readDataFile('../../dumps/latest.users.yaml');
-    delete userCfg['anonymous@example.org'].public.icon;
+    delete (orf(userCfg['anonymous@example.org']).public || {}).icon;
     flatMapObj(userCfg, EX.learnUser);
 
     byLegacyName[''] = jsonTrailingNoComma;
@@ -87,7 +93,20 @@ const EX = {
     const agent = { id: 'urn:uuid:' + uuid };
 
     const pop = mustPop(userSpec);
-    EX.learnUserPub(agent, pop('undef | dictObj', 'public'));
+
+    const userPub = pop('obj | undef', 'public');
+    if (userPub) {
+      agent.name = expectSingleNestProp('field "public"',
+        userPub, 'displayName');
+    }
+    const auids = pop('obj | undef', 'author_identities');
+    if (auids) {
+      if (userPub) { throw new Error('Mixed format versions'); }
+      const [firstAuId, ...tooMany] = Object.values(auids);
+      if (tooMany.length) { throw new Error('Too many AuIDs'); }
+      Object.assign(agent, firstAuId);
+    }
+
     byUUID[uuid] = agent;
     byLegacyName[legacyUserName] = uuid;
 
@@ -97,7 +116,8 @@ const EX = {
       namelessUsers.push(legacyUserName);
       logLineParts.push(legacyUserName);
     }
-    agent.type = EX.guessAgentType(agent);
+    if (agent.name === 'NN') { delete agent.name; }
+    if (!agent.type) { agent.type = EX.guessAgentType(agent); }
     // console.debug(logLineParts.join('\t'));
 
     /* Versions before 2024-11-12 had a bug that wrote a raw UUID as the
@@ -129,10 +149,14 @@ const EX = {
     fixBuggyUuidAgentId += ('s~"urn:uuid:(' + buggyAgentUuid + '|'
      + buggyDoubleHashedUuid + ')"~"' + agent.id + '"~g # ' + lunEnc + '\n');
 
-    const aliases = [].concat(pop('undef | ary', 'alias')).filter(Boolean);
+    const aliases = [].concat(pop('undef | ary', 'alias'),
+      pop('undef | ary', 'upstream_userid_aliases')).filter(Boolean);
     if (aliases.length) {
       as22currentUser.push('', 'upstream_userid_aliases:');
       aliases.forEach(function addAlias(al) {
+        if (al.id) {
+          return addAlias(expectSingleNestProp('alias', al, 'id'));
+        }
         mustBe.nest('upstream user ID alias', al);
         byLegacyName[al] = uuid;
         as22currentUser.push('    - id: ' + JSON.stringify(al));
@@ -141,23 +165,15 @@ const EX = {
 
     pop('undef | eeq:"admin"', 'role');
     const rules = orf(pop('undef | ary', 'rules'));
-    if (rules.length) {
+    const aclGrp = orf(pop('undef | ary', 'acl_user_groups'));
+    if (rules.length || aclGrp.length) {
       as22currentUser.push('', 'acl_user_groups:');
-      rules.forEach(EX.learnOneAclEntry);
+      (rules || []).forEach(EX.learnOneAclEntry);
+      (aclGrp || []).forEach(g => as22currentUser.push('    - '
+        + JSON.stringify(g)));
     }
 
     pop.expectEmpty();
-  },
-
-
-  learnUserPub(agent, userPub) {
-    if (!userPub) { return; }
-    const pop = mustPop(userPub);
-
-    const name = pop.nest('displayName');
-
-    pop.expectEmpty();
-    Object.assign(agent, { name });
   },
 
 
