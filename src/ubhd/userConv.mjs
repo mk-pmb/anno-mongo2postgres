@@ -81,14 +81,22 @@ const EX = {
   },
 
 
+  makeProfileUrlFromUrlEncodedLegacyUserName(lunEnc) {
+    if (lunEnc.startsWith('http:')) { return lunEnc; }
+    if (lunEnc.startsWith('https:')) { return lunEnc; }
+    if (lunEnc.startsWith('urn:')) { return lunEnc; }
+    return uuidBaseUrl + lunEnc;
+  },
+
+
   learnUser(legacyUserName, userSpec) {
     const lunEnc = encodeURI(legacyUserName);
     if (lunEnc !== legacyUserName) {
       throw new Error('Legacy username needs encoding: ' + lunEnc);
     }
     if (!userSpec) { return; }
-    const customUserURL = getOwn(customUserURLs, legacyUserName);
-    const profileUrl = (customUserURL || (uuidBaseUrl + lunEnc));
+    const profileUrl = (getOwn(customUserURLs, legacyUserName)
+      || EX.makeProfileUrlFromUrlEncodedLegacyUserName(lunEnc));
     const uuid = uuidv5('url', profileUrl);
     const agent = { id: 'urn:uuid:' + uuid };
 
